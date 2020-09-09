@@ -1,4 +1,11 @@
 /*
+Ciencia da Computacao - Pucminas
+AED3 - manha
+Larissa Domingues Gomes
+Marcelo Franca Cabral
+Pedro Henrique Lima Carvalho
+Tarcila Fernanda Resende da Silva
+
 Classe CRUD - Realiza Operacoes CRUD de Arquivo
 Versão 2.0 - Arquivos Indexados
 Cabecalho

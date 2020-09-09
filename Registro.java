@@ -1,8 +1,10 @@
 /*
 Ciencia da Computacao - Pucminas
 AED3 - manha
+Larissa Domingues Gomes
+Marcelo Franca Cabral
 Pedro Henrique Lima Carvalho
-651230
+Tarcila Fernanda Resende da Silva
 */
 
 /*
