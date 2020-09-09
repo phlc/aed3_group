@@ -15,31 +15,30 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 
 /*
-Classe Livro
+Classe Usuario
 */
 
-class Livro implements Registro{
+class Usuario implements Registro{
 
 //atributos
-   private int id;
+   private int idUsuario;
    public String nome;
-   public String autor;
-   public float preco;
-   private DecimalFormat df = new DecimalFormat("#,##0.00");
+   public String email;
+   private String senha;
 
 //contrutores
-   public Livro(int i, String n, String a, float p){
-      this.id = i;
+   public Usuario(int i, String n, String e, String s){
+      this.idUsuario = i;
       this.nome = n;
-      this.autor = a;
-      this.preco = p;
+      this.email = e;
+      this.senha = s;
    }
 
-   public Livro(){
-      this.id = -1;
-      this.nome = "vazio";
-      this.autor = "vazio";
-      this.preco = 0.0F;
+   public Usuario(){
+      this.idUsuario = -1;
+      this.nome = "";
+      this.email = "";
+      this.senha = "";
    }
 
 //metodos
@@ -48,7 +47,7 @@ class Livro implements Registro{
    @return int id
    */
    public int getID(){
-      return(this.id);
+      return(this.idUsuario);
    }
    
    /*
@@ -56,7 +55,7 @@ class Livro implements Registro{
    @param int n
    */
    public void setID(int n){
-      this.id = n;
+      this.idUsuario = n;
    }
 
    /*
@@ -67,10 +66,10 @@ class Livro implements Registro{
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       DataOutputStream dos = new DataOutputStream(baos);
 
-      dos.writeInt(this.id);
+      dos.writeInt(this.idUsuario);
       dos.writeUTF(this.nome);
-      dos.writeUTF(this.autor);
-      dos.writeFloat(this.preco);
+      dos.writeUTF(this.email);
+      dos.writeUTF(this.senha);
 
       return(baos.toByteArray());
    }
@@ -83,21 +82,21 @@ class Livro implements Registro{
       ByteArrayInputStream bais = new ByteArrayInputStream(ba);
       DataInputStream dis = new DataInputStream(bais);
 
-      this.id = dis.readInt();
+      this.idUsuario = dis.readInt();
       this.nome = dis.readUTF();
-      this.autor = dis.readUTF();
-      this.preco = dis.readFloat();
+      this.email = dis.readUTF();
+      this.senha = dis.readUTF();
    }
 
    /*
    toString - forma uma String a partir dos dados do objeto
-   @return String livro
+   @return String
    */
    public String toString(){
-      String resp = "\nID: "+this.id;
+      String resp = "\nID: "+this.idUsuario;
       resp = resp + "\nNome: "+this.nome;
-      resp = resp + "\nAutor: "+this.autor;
-      resp = resp + "\nPreço: R$"+(df.format(this.preco)+"\n");
+      resp = resp + "\nEmail: "+this.email;
+      resp = resp + "\nSenha: "+this.senha;
       return(resp);
    }
 
@@ -106,7 +105,7 @@ class Livro implements Registro{
    @return String da chave secundaria
    */
    public String chaveSecundaria(){
-      return(this.nome);
+      return(this.email);
    }
 
 }
