@@ -50,6 +50,13 @@ public class Acesso{
       leitor.nextLine();
    }
 
+   /*
+   clear - limpa a tela do terminal
+   */
+   public static void clear(){
+      System.out.print("\033[H\033[2J");  
+      System.out.flush();  
+   }
 
    /*
    main - funcao principal de acesso
@@ -61,6 +68,7 @@ public class Acesso{
       String buffer;  
    
       do{
+         clear();
          telaInicial();
          buffer = leitor.nextLine();
          
