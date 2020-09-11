@@ -202,6 +202,10 @@ public class Lista_Apagados {
             arquivo.writeShort(chave);
             arquivo.writeLong(dado); 
             arquivo.writeLong(-1); //proximo node
+
+            //escrever ponteiro
+            arquivo.seek(ponteiro);
+            arquivo.writeLong(endereco);
          }   
       }
       return node;
