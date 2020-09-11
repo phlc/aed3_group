@@ -118,19 +118,19 @@ public class Lista_Apagados {
 
    /*
    insert - insere um novo node na lista de forma ordenada
-   @param short tamanho long posicao
+   @param short chave long dado
    */
-   public void insert(short tamanho, long dado){
-      long node;            //posição primeiro node
+   public void insert(short chave, long dado){
+      long cabeca;          //posição primeiro node
       long endereco;        //endereco a ser escrito      
 
       //ler a posição do primeiro node da lista
       arquivo.seek(INICIO);
-      node = readLong();
+      cabeca = readLong();
 
       //se a lista nao está vazia, inserir na posicao certar recursivamente
       if(node != -1){
-         endereco = insert(tamanho, posicao, node);
+         endereco = insert(chave, dado, cabeca);
       } 
       //lista vazia, criar primeiro node
       else{
@@ -139,13 +139,13 @@ public class Lista_Apagados {
          arq.seek(endereco);
 
          //escrever dados
-         arquivo.writeShort(tamanho);
-         arquivo.writeLong(posicao);
-         arquivo.writeLong(-1);
+         arquivo.writeShort(chave);
+         arquivo.writeLong(dado); 
+         arquivo.writeLong(-1); //proximo node
       }
 
       //verificar se INICIO mudou
-      if(node != endereco){
+      if(cabeca != endereco){
          arquivo.seek(INICIO);
          arquivo.writeLong(endereco);
       }
@@ -153,8 +153,58 @@ public class Lista_Apagados {
    /*
    overload insert
    @param short tamanho, long dado, long node
+   @return long endereco
+   */
+   private long insert(short chave, long dado, long node){ 
+      short tam_lido; //tamanho do registro referenciado pelo node
+      long dado_lido; //posição do registro referenciado pelo node
+      long ponteiro;  //posição do ponteiro para o proximo node
+      long prox_node; //posição do próximo node
+      
+      //ler dados do arquivo
+      arquivo.seek(node);
+      tam_lido = arquivo.readShort();
+      dado_lido = arquivo.readLong();
+      ponteiro = arquivo.getFilePointer();
+      prox_node = arquivo.readLong();
+      
+      //verificar se tamanho é adequado
+      if(chave < tam_lido){
+         //armazenar endereco do novo node e ir para a posicao
+         long endereco = arq.length(); //posicao do novo node
+         arquivo.seek(endereco);
+      
+         //escrever dados
+         arquivo.writeShort(chave);
+         arquivo.writeLong(dado);
+         arquivo.writeLong(node);
+         node = endereco;
+      }
+      else{
+         //verificar se existe proximo node
+         if(prox_node != -1){
+            endereco = insert(chave, dado, prox_node);
+            
+            //verificar se o proximo mudou
+            if(prox_node != endereco){
+               arquivo.seek(ponteiro);
+               arquivo.writeLong(endereco);
+            }
+         } 
+         //se no final da lista
+         else{
+            //armazenar endereco do novo node e ir para a posicao
+            endereco = arq.length(); //posicao do novo node
+            arq.seek(endereco);
 
-
+            //escrever dados
+            arquivo.writeShort(chave);
+            arquivo.writeLong(dado); 
+            arquivo.writeLong(-1); //proximo node
+         }   
+      }
+      return node;
+   }
 }
 
 
