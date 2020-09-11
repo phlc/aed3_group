@@ -34,8 +34,8 @@ Long  - prox_node: Posição do próximo node
 public class Lista_Apagados {
    
 //atributos da classe
-   final private static int TAMANHO_NODE = 18;    //Short+Long+Long
    final private static short POS_APAGADOS = 0;   //Posicao do numero de nodes pagados
+   final private static int MAX_APAGADOS = 4;     //Numero máximo de apagados antes da limpeza
    final private static long INICIO = 2;          //Posicao do endereco do primeiro node    
    final private static String CONTROLE_A = "a_"; //início nome do arquivo para controle
    final private static String CONTROLE_B = "b_"; //início nome do arquivo para controle
@@ -43,24 +43,24 @@ public class Lista_Apagados {
 //atributos
    private RandomAccessFile arquivo;
    private String nome_arquivo;   
-   private String controle; //para controle do nome do arquivo quando limpar apagados 
+   private String prox_nome; //para controle do nome do arquivo quando limpar apagados 
 
 //construtor
    public Lista_Apagados(String nome) throws Exception{
       //Verificar se já existe o arquivo
       if(new File(CONTROLE_A+nome).exists()){
          this.nome_arquivo = CONTROLE_A+nome;
-         this.controle = CONTROLE_A;
+         this.prox_nome = CONTROLE_B+nome;
          this.arquivo = new RandomAccessFile(nome_arquivo, "rws");
       }
       else if(new File(CONTROLE_B+nome).exists()){ 
          this.nome_arquivo = CONTROLE_B+nome;
-         this.controle = CONTROLE_B;
-         this.arquivo = new RandomAccessFile(nome_arquivo, "rws");        
+         this.prox_nome = CONTROLE_A+nome;
+         this.arquivo = new RandomAccessFile(nome_arquivo, "rws");     
       }
       else{
          this.nome_arquivo = CONTROLE_A+nome;
-         this.controle = CONTROLE_A;
+         this.prox_nome = CONTROLE_B+nome;
          this.arquivo = new RandomAccessFile(nome_arquivo, "rws");
          
          //escrever cabeçalho
@@ -259,8 +259,15 @@ public class Lista_Apagados {
          arquivo.seek(POS_APAGADOS);
          short apagados = arquivo.readShort();
          apagados++;
-         arquivo.seek(POS_APAGADOS);
-         arquivo.writeShort(apagados);
+
+         //verifica se excedido o máximo de apagados.
+         if(apagados > MAX_APAGADOS){
+            clear();
+         }
+         else{
+            arquivo.seek(POS_APAGADOS);
+            arquivo.writeShort(apagados);
+         }
 
          //confirmar exclusao
          confirmacao = true;
@@ -271,6 +278,58 @@ public class Lista_Apagados {
       }
          
       return confirmacao;
+   }
+
+   /*
+   clear - cria um novo arquivo da lista sem os apagados
+   */
+   private void clear() throws Exception{
+      //apagar eventual prox_nome
+      new File(prox_nome).delete();
+      
+      //criar novo arquivo com o prox_nome
+      RandomAccessFile novo = new RandomAccessFile(prox_nome, "rws");
+      
+      //dados
+      short tam_lido;
+      long dado_lido;
+      long prox_node;
+
+      
+      //escrever cabeçalho novo
+      novo.writeShort(0);
+      
+      //obter posicao do primeiro node do arquivo
+      arquivo.seek(INICIO);
+      prox_node = arquivo.readLong();
+
+      //escrever nodes
+      while(prox_node != -1){
+         novo.writeLong(novo.getFilePointer()+8);
+
+         arquivo.seek(prox_node);
+         tam_lido = arquivo.readShort();
+         dado_lido = arquivo.readLong();
+         prox_node = arquivo.readLong();
+
+         novo.writeShort(tam_lido);
+         novo.writeLong(dado_lido);
+      }
+   
+      //escrever o ultimo ponteiro -1
+      novo.writeLong(-1);
+
+      //trocar nomes dos arquivos
+      String buffer = nome_arquivo;
+      nome_arquivo = prox_nome;
+      prox_nome = buffer;
+      
+      //trocar arquivo do objeto
+      arquivo.close();
+      arquivo = novo;
+      
+      //apagar arquivo anterior
+      new File(prox_nome).delete();
    }
 }
 
