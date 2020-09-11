@@ -79,15 +79,15 @@ public class Lista_Apagados {
    */
    public long read(short chave) throws Exception{
       long dado = -1; //resposta
-      long node;      //posição primeiro node
+      long cabeca;      //posição primeiro node
 
       //ler a posicao do primeiro node da lista
       arquivo.seek(INICIO);
-      node = arquivo.readLong();
+      cabeca = arquivo.readLong();
       
       //se a lista não está vazia, buscar recursivamente      
-      if(node != -1)
-         dado = read(chave, node);
+      if(cabeca != -1)
+         dado = read(chave, cabeca);
       
       return dado;
    }
@@ -153,7 +153,7 @@ public class Lista_Apagados {
    /*
    overload insert
    @param short tamanho, long dado, long node
-   @return long endereco
+   @return long node
    */
    private long insert(short chave, long dado, long node) throws Exception{ 
       short tam_lido; //tamanho do registro referenciado pelo node
@@ -209,6 +209,68 @@ public class Lista_Apagados {
          }   
       }
       return node;
+   }
+
+   /*
+   remove - remove um node da lista
+   @param long dado - dado é a posição do registro no arquivo originário
+   @return boolean
+   */
+   public boolean remove(long dado) throws Exception{
+      boolean confirmacao = false;
+      long cabeca;      //posição primeiro node
+
+      //ler a posicao do primeiro node da lista
+      arquivo.seek(INICIO);
+      cabeca = arquivo.readLong();
+      
+      //se a lista não está vazia, buscar recursivamente      
+      if(cabeca != -1)
+         confirmacao = remove(dado, cabeca, INICIO);
+      
+      return confirmacao;
+   }
+   /*
+   overload remove
+   @param long dado long node long
+   @return boolean
+   */
+   private boolean remove(long dado, long node, long anterior) throws Exception{
+      boolean confirmacao = false;
+      short tam_lido; //tamanho do registro referenciado pelo node
+      long dado_lido; //posição do registro referenciado pelo node
+      long ponteiro;  //posição do ponteiro para o proximo node
+      long prox_node; //posição do próximo node      
+
+      //ler dados do arquivo
+      arquivo.seek(node);
+      tam_lido = arquivo.readShort();
+      dado_lido = arquivo.readLong();
+      ponteiro = arquivo.getFilePointer();
+      prox_node = arquivo.readLong();
+     
+      //verificar se é o node a ser deletado
+      if(dado_lido == dado){
+         //escrever no ponteiro anterior o proximo ponteiro
+         arquivo.seek(anterior);
+         arquivo.writeLong(prox_node);
+         
+         //atualizar o cabeçalho
+         arquivo.seek(POS_APAGADOS);
+         short apagados = arquivo.readShort();
+         apagados++;
+         arquivo.seek(POS_APAGADOS);
+         arquivo.writeShort(apagados);
+
+         //confirmar exclusao
+         confirmacao = true;
+      }
+      //Nao é fim da lista
+      else if(prox_node != -1){
+         confirmacao = remove(dado, prox_node, ponteiro);
+      }
+         
+      return confirmacao;
    }
 }
 
