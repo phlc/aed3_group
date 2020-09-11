@@ -82,8 +82,8 @@ public class Lista_Apagados {
       long node;      //posição primeiro node
 
       //ler a posicao do primeiro node da lista
-      arq.seek(INICIO);
-      node = arq.readLong;
+      arquivo.seek(INICIO);
+      node = arquivo.readLong;
       
       //se a lista não está vazia, buscar recursivamente      
       if(node != -1)
@@ -100,7 +100,12 @@ public class Lista_Apagados {
       short tam_lido; //tamanho do registro referenciado pelo node
       long posicao;   //posição do registro referenciado pelo node
       long prox_node; //posição do próximo node
-
+      
+      //ler dados do arquivo
+      arquivo.seek(node);
+      tam_lido = arquivo.readShort();
+      posicao = arquivo.readLong();
+      prox_node = arquivo.readLong();
       //verificar tamanho do registro referenciado
       if(tamanho < tam_lido)
          resp = posicao;
@@ -110,8 +115,20 @@ public class Lista_Apagados {
       return resp;
    }
 
-
-
+   /*
+   insert - insere um novo node na lista de forma ordenada
+   @param short tamanho long posicao
+   @return boolean confirmacao
+   */
+   public boolean insert(short tamanho, long posicao){
+      boolean resp = false; //resposta
+      long node;            //posição primeiro node
+      
+      //ler a posição do primeiro node da lista
+      arquivo.seek(INICIO);
+   
+   
+   ]
 
 
 }
