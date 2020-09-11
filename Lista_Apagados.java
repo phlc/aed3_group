@@ -53,10 +53,10 @@ public class Lista_Apagados {
          this.controle = CONTROLE_A;
          this.arquivo = new RandomAccessFile(nome_arquivo, "rws");
       }
-      else if(new File(CONTROLE_B+nome).exists(){ 
+      else if(new File(CONTROLE_B+nome).exists()){ 
          this.nome_arquivo = CONTROLE_B+nome;
          this.controle = CONTROLE_B;
-         this.arquivo = new RandomAccessFile(nome_arquivo "rws");        
+         this.arquivo = new RandomAccessFile(nome_arquivo, "rws");        
       }
       else{
          this.nome_arquivo = CONTROLE_A+nome;
@@ -77,13 +77,13 @@ public class Lista_Apagados {
    @param short chave
    @return long dado ou -1 se inexistente
    */
-   public long read(short chave){
+   public long read(short chave) throws Exception{
       long dado = -1; //resposta
       long node;      //posição primeiro node
 
       //ler a posicao do primeiro node da lista
       arquivo.seek(INICIO);
-      node = arquivo.readLong;
+      node = arquivo.readLong();
       
       //se a lista não está vazia, buscar recursivamente      
       if(node != -1)
@@ -95,7 +95,7 @@ public class Lista_Apagados {
    overload read
    @param short chave, long node
    */
-   private long read(short chave, long node){
+   private long read(short chave, long node) throws Exception{
       long dado = -1; //resposta
       short tam_lido; //tamanho do registro referenciado pelo node
       long dado_lido; //posição do registro referenciado pelo node
@@ -111,7 +111,7 @@ public class Lista_Apagados {
       if(chave <= tam_lido)
          dado = dado_lido;
       else if (prox_node != -1)
-         dado = read(tamanho, prox_node);
+         dado = read(chave, prox_node);
 
       return dado;
    }
@@ -120,23 +120,23 @@ public class Lista_Apagados {
    insert - insere um novo node na lista de forma ordenada
    @param short chave long dado
    */
-   public void insert(short chave, long dado){
+   public void insert(short chave, long dado) throws Exception{
       long cabeca;          //posição primeiro node
       long endereco;        //endereco a ser escrito      
 
       //ler a posição do primeiro node da lista
       arquivo.seek(INICIO);
-      cabeca = readLong();
+      cabeca = arquivo.readLong();
 
       //se a lista nao está vazia, inserir na posicao certar recursivamente
-      if(node != -1){
+      if(cabeca != -1){
          endereco = insert(chave, dado, cabeca);
       } 
       //lista vazia, criar primeiro node
       else{
          //armazenar endereco do novo node e ir para a posicao
-         endereco = arq.length(); //posicao do novo node
-         arq.seek(endereco);
+         endereco = arquivo.length(); //posicao do novo node
+         arquivo.seek(endereco);
 
          //escrever dados
          arquivo.writeShort(chave);
@@ -155,12 +155,13 @@ public class Lista_Apagados {
    @param short tamanho, long dado, long node
    @return long endereco
    */
-   private long insert(short chave, long dado, long node){ 
+   private long insert(short chave, long dado, long node) throws Exception{ 
       short tam_lido; //tamanho do registro referenciado pelo node
       long dado_lido; //posição do registro referenciado pelo node
       long ponteiro;  //posição do ponteiro para o proximo node
       long prox_node; //posição do próximo node
-      
+      long endereco;  //posição do novo node      
+
       //ler dados do arquivo
       arquivo.seek(node);
       tam_lido = arquivo.readShort();
@@ -171,7 +172,7 @@ public class Lista_Apagados {
       //verificar se tamanho é adequado
       if(chave < tam_lido){
          //armazenar endereco do novo node e ir para a posicao
-         long endereco = arq.length(); //posicao do novo node
+         endereco = arquivo.length(); //posicao do novo node
          arquivo.seek(endereco);
       
          //escrever dados
@@ -194,8 +195,8 @@ public class Lista_Apagados {
          //se no final da lista
          else{
             //armazenar endereco do novo node e ir para a posicao
-            endereco = arq.length(); //posicao do novo node
-            arq.seek(endereco);
+            endereco = arquivo.length(); //posicao do novo node
+            arquivo.seek(endereco);
 
             //escrever dados
             arquivo.writeShort(chave);
