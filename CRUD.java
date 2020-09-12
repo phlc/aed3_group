@@ -206,14 +206,13 @@ class CRUD <T extends Registro>{
          apagados.insert(tam, pos);
 
          //verificar se há registro apagado disponível
-         pos = apagados.read(tam);
-      
+         pos = apagados.read(tamNovo);
          //nao há disponível
          if (pos == -1){
             pos = arq.length();
             arq.seek(pos);
             arq.writeByte(0);
-            arq.writeShort(tam);
+            arq.writeShort(tamNovo);
          }
          //há registro apagado disponível
          else{
@@ -235,7 +234,7 @@ class CRUD <T extends Registro>{
 
          //escrever dados
          arq.write(baNovo);
-         
+
          //atualizar índices
          direto.update(id, pos);
          indireto.update(objeto.chaveSecundaria(), id);
