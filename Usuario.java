@@ -24,7 +24,7 @@ class Usuario implements Registro{
    private int idUsuario;
    public String nome;
    public String email;
-   private String senha;
+   public String senha;
 
 //contrutores
    public Usuario(int i, String n, String e, String s){
