@@ -34,6 +34,7 @@ class CRUD <T extends Registro>{
    private RandomAccessFile arq;
    private HashExtensivel direto;
    private ArvoreBMais_String_Int indireto;
+   private Lista_Apagados apagados;
 
 //construtor
    CRUD(Constructor<T> constructor, String file) throws Exception{
@@ -66,6 +67,7 @@ class CRUD <T extends Registro>{
       //criacao dos indices direto e indireto
       direto = new HashExtensivel(4, (file+".diretorio"), (file+".cestos"));
       indireto = new ArvoreBMais_String_Int(5, (file+".arvore"));
+      apagados = new Lista_Apagados(file+".apagados");
    }
 
 //metodos
@@ -91,11 +93,35 @@ class CRUD <T extends Registro>{
       arq.seek(NEXT_ID);
       arq.writeInt(nextId + 1);
 
-      //escrever novo registro
-      long pos = arq.length();
-      arq.seek(pos);
-      arq.writeByte(lapide);
-      arq.writeShort(tam);
+      //verificar se há registro apagado disponível
+      long pos = apagados.read(tam);
+      
+      //nao há disponível
+      if (pos == -1){
+         pos = arq.length();
+         arq.seek(pos);
+         arq.writeByte(lapide);
+         arq.writeShort(tam);
+      }
+      //há registro apagado disponível
+      else{
+         arq.seek(pos);
+         //verificar se de fato o registro está apagado
+         if (0 == arq.readByte())
+            throw new Exception ("Arquivos Inconsistentes CRUDxApagados");
+         
+         //alterar lápide
+         arq.seek(pos);
+         arq.writeByte(0);
+
+         //não alterar o tamanho
+         arq.seek(pos+3); //1byte da lápide 2bytes do tamanho
+
+         //apagar o registro de apagados
+         apagados.remove(pos);
+      }
+
+      //escrever dados
       arq.write(ba);
       
       //escrever indice direto
@@ -176,12 +202,41 @@ class CRUD <T extends Registro>{
          arq.seek(pos);
          arq.writeByte(1);
          
-         //criar novo registro
-         pos = arq.length();
-         arq.seek(pos);
-         arq.writeByte(0);
-         arq.writeShort(tamNovo);
+         //incluir registro deletado em apagados
+         apagados.insert(tam, pos);
+
+         //verificar se há registro apagado disponível
+         pos = apagados.read(tam);
+      
+         //nao há disponível
+         if (pos == -1){
+            pos = arq.length();
+            arq.seek(pos);
+            arq.writeByte(0);
+            arq.writeShort(tam);
+         }
+         //há registro apagado disponível
+         else{
+            arq.seek(pos);
+            //verificar se de fato o registro está apagado
+            if (0 == arq.readByte())
+               throw new Exception ("Arquivos Inconsistentes CRUDxApagados");
+         
+            //alterar lápide
+            arq.seek(pos);
+            arq.writeByte(0);
+
+            //não alterar o tamanho
+            arq.seek(pos+3); //1byte da lápide 2bytes do tamanho
+
+            //apagar o registro de apagados
+            apagados.remove(pos);
+         }
+
+         //escrever dados
          arq.write(baNovo);
+         
+         //atualizar índices
          direto.update(id, pos);
          indireto.update(objeto.chaveSecundaria(), id);
       }      
@@ -221,6 +276,9 @@ class CRUD <T extends Registro>{
          //apagar registro
          arq.seek(pos);
          arq.writeByte(1);
+
+         //incluir registro nos apagados
+         apagados.insert(tam, pos);
          
          //apagar indice direto
          direto.delete(id);
