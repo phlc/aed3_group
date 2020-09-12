@@ -94,6 +94,64 @@ public class Acesso{
    }
 
    /*
+   acessoSistem - Gerencia o acesso ao Sistema
+   @param Scanner
+   */
+   public static void acessoSistema(Scanner leitor) throws Exception{
+      clear();
+      System.out.println();
+      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println("==================");
+      System.out.println();
+      System.out.println("ACESSO AO SISTEMA");
+      System.out.println();
+      
+      System.out.print("E-mail: ");
+      String email = leitor.nextLine();
+
+      Usuario user = arquivo.read(email);
+      if(user == null){
+         clear();
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("USUÁRIO NÃO CADASTRADO");
+         System.out.println();
+         System.out.println("SELECIONE OPÇÃO (2) PARA CRIAR USUÁRIO");
+         pause(leitor);
+      }
+      else{
+         System.out.println();
+         System.out.print("Senha: ");
+         String senha = leitor.nextLine();
+         
+         if(senha.equals(user.senha)){
+            clear();
+            System.out.println();
+            System.out.println(_NOME+" "+_VERSAO);
+            System.out.println("==================");
+            System.out.println();
+            System.out.println("AUTENTICAÇÃO REALIZADA COM SUCESSO");
+            System.out.println();
+            System.out.println("AGUARDE NOVIDADES");
+            pause(leitor); 
+         }
+         else{
+            clear();
+            System.out.println();
+            System.out.println(_NOME+" "+_VERSAO);
+            System.out.println("==================");
+            System.out.println();
+            System.out.println("SENHA INCORRETA");
+            System.out.println();
+            System.out.println("CASO TENHA ESQUECIDO A SENHA SELECIONE OPÇÃO (3)");
+            pause(leitor);
+         }
+      } 
+   }
+
+   /*
    novoUsuario - cadastra um novo usuário
    @param Scanner
    */
@@ -205,6 +263,7 @@ public class Acesso{
          pause(leitor); 
       } 
    }
+
    /*
    main - funcao principal de acesso
    */
@@ -233,8 +292,12 @@ public class Acesso{
                   telaFinal(leitor);
                   break;
                case 1:
-                  System.out.println("\nTeste login");
-                  pause(leitor);
+                  try{
+                     acessoSistema(leitor);
+                  }
+                  catch (Exception e){
+                     telaErro(leitor);
+                  }
                   break;
                case 2:
                   try{
