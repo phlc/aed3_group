@@ -333,7 +333,7 @@ public class Acesso{
             clear();
             telaInicial();
             buffer = leitor.nextLine();
-         
+            //arquivo.delete(12);
             try{
                escolha = Integer.parseInt(buffer);
             }
@@ -377,11 +377,10 @@ public class Acesso{
    
       }
       catch (Exception e){
-         System.out.println();
          System.out.println(_NOME+" "+_VERSAO);
          System.out.println("==================");
          System.out.println();
-         System.out.println("BASE DE DADOS INDISPONÍVEL");
+         System.out.println("ERRO NA BASE DE DADOS: "+e.toString().replace("MyException: ",""));
          System.out.println();
          System.out.println("TENTE NOVAMENTE MAIS TARDE");
          System.out.println();
