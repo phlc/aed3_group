@@ -126,21 +126,36 @@ public class Acesso{
       
          System.out.print("\nSenha: ");
          String senha = leitor.nextLine();
-
-         Usuario novo = new Usuario(-1, nome, email, senha);
-         arquivo.create(novo);
-
+        
          clear();
          System.out.println();
          System.out.println(_NOME+" "+_VERSAO);
          System.out.println("==================");
          System.out.println();
-         System.out.println("USUÁRIO CADASTRADO COM SUCESSO");
+         System.out.println("CONFIRME OS DADOS:");
          System.out.println();
-         System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
-         pause(leitor);
+         System.out.println("NOME: "+nome);
+         System.out.println("EMAIL: "+email);
+         System.out.println();
+         System.out.print("CONFIRME OS DADOS (SIM(S) NÃO(N)): ");
+         String confirmacao = leitor.nextLine();
+         confirmacao = confirmacao.toUpperCase();
+ 
+         if(confirmacao.contains("S")){
+            Usuario novo = new Usuario(-1, nome, email, senha);
+            arquivo.create(novo);
 
-     } 
+            clear();
+            System.out.println();
+            System.out.println(_NOME+" "+_VERSAO);
+            System.out.println("==================");
+            System.out.println();
+            System.out.println("USUÁRIO CADASTRADO COM SUCESSO");
+            System.out.println();
+            System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
+            pause(leitor);
+         }
+      } 
    }
 
    /*
