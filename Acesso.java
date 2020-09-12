@@ -17,6 +17,7 @@ public class Acesso{
    //atributos estaticos da classe
    private static String _NOME = "PERGUNTAS";
    private static String _VERSAO = "1.0";
+   private static CRUD<Usuario> arquivo;
    
 
 
@@ -40,6 +41,40 @@ public class Acesso{
    }  
 
    /*
+   telaErro - Apresenta tela de erro
+   @Scanner leitor
+   */
+   public static void telaErro(Scanner leitor){
+      clear();
+      System.out.println();
+      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println("==================");
+      System.out.println();
+      System.out.println("DESCULPE, OCORREU UM ERRO INESPERADO");
+      System.out.println();
+      System.out.println("TENTE NOVAMENTE MAIS TARDE");
+      System.out.println();
+      pause(leitor);
+   }
+
+   /*
+   telaFinal - Apresenta tela final
+   @Scanner leitor
+   */
+   public static void telaFinal(Scanner leitor){
+      clear();
+      System.out.println();
+      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println("==================");
+      System.out.println();
+      System.out.println("OBRIGADO POR CONTRIBUIR PARA NOSSA COMUNIDADE");
+      System.out.println();
+      System.out.println("VOLTE SEMPRE");
+      System.out.println();
+      pause(leitor);
+   }
+
+   /*
    pause - realiza uma pausa até novo input
    @param Scanner
    */
@@ -59,47 +94,115 @@ public class Acesso{
    }
 
    /*
+   novoUsuario - cadastra um novo usuário
+   @param Scanner
+   */
+   public static void novoUsuario(Scanner leitor) throws Exception{
+      clear();
+      System.out.println();
+      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println("==================");
+      System.out.println();
+      System.out.println("NOVO USUÁRIO");
+      System.out.println();
+      
+      System.out.print("E-mail: ");
+      String email = leitor.nextLine();
+
+      if(arquivo.read(email) != null){
+         clear();
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("USUÁRIO JÁ CADASTRADO");
+         System.out.println();
+         System.out.println("CASO TENHA ESQUECIDO A SENHA SELECIONE OPÇÃO (3)");
+         pause(leitor);
+      }
+      else{
+         System.out.print("\nNome: ");
+         String nome = leitor.nextLine();
+      
+         System.out.print("\nSenha: ");
+         String senha = leitor.nextLine();
+
+         Usuario novo = new Usuario(-1, nome, email, senha);
+         arquivo.create(novo);
+
+         clear();
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("USUÁRIO CADASTRADO COM SUCESSO");
+         System.out.println();
+         System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
+         pause(leitor);
+
+     } 
+   }
+
+   /*
    main - funcao principal de acesso
    */
    public static void main(String[] args){
-      //declaracoes
+      //declaracoes 
       Scanner leitor = new Scanner(System.in);
       int escolha = 0; 
-      String buffer;  
+      String buffer;
+      try{
+         arquivo = new CRUD<Usuario>(Usuario.class.getConstructor(), "usuarios.db");
    
-      do{
-         clear();
-         telaInicial();
-         buffer = leitor.nextLine();
+         do{
+            clear();
+            telaInicial();
+            buffer = leitor.nextLine();
          
-         try{
-            escolha = Integer.parseInt(buffer);
-         }
-         catch (NumberFormatException e){ 
-            escolha = -1;
-         }
+            try{
+               escolha = Integer.parseInt(buffer);
+            }
+            catch (NumberFormatException e){ 
+               escolha = -1;
+            }
 
-         switch(escolha){
-            case 0:
-               System.out.println("\nObrigado por utilizar nosso programa");
-               pause(leitor);
-               break;
-            case 1:
-               System.out.println("\nTeste login");
-               pause(leitor);
-               break;
-            case 2:
-               System.out.println("\nTeste novo usuário");
-               pause(leitor);
-               break;
-            case 3:
-               System.out.println("\nTeste esqueci senha");
-               pause(leitor);
-               break;
-            default: 
-               System.out.println("\nEscolha Inválida");
-               pause(leitor);
-         }
-      }while(escolha!=0);
+            switch(escolha){
+               case 0:
+                  telaFinal(leitor);
+                  break;
+               case 1:
+                  System.out.println("\nTeste login");
+                  pause(leitor);
+                  break;
+               case 2:
+                  try{
+                     novoUsuario(leitor);
+                  }
+                  catch (Exception e){
+                     telaErro(leitor);
+                  }
+                  break;
+               case 3:
+                  System.out.println("\nTeste esqueci senha");
+                  pause(leitor);
+                  break;
+               default: 
+                  System.out.println("\nEscolha Inválida");
+                  pause(leitor);
+            }
+         }while(escolha!=0);
+   
+      }
+      catch (Exception e){
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("BASE DE DADOS INDISPONÍVEL");
+         System.out.println();
+         System.out.println("TENTE NOVAMENTE MAIS TARDE");
+         System.out.println();
+         pause(leitor);
+      }
    } 
 }
