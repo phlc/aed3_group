@@ -157,7 +157,54 @@ public class Acesso{
          }
       } 
    }
+   
+   /*
+   esqueciSenha - Recupera a senha
+   @param Scanner
+   */
+   public static void esqueciSenha(Scanner leitor) throws Exception{
+      clear();
+      System.out.println();
+      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println("==================");
+      System.out.println();
+      System.out.println("RECUPERAÇÃO DA SENHA");
+      System.out.println();
+      
+      System.out.print("E-mail: ");
+      String email = leitor.nextLine();
 
+      Usuario user = arquivo.read(email);
+      if(user == null){
+         clear();
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("USUÁRIO NÃO CADASTRADO");
+         System.out.println();
+         System.out.println("SELECIONE OPÇÃO (2) PARA CRIAR USUÁRIO");
+         pause(leitor);
+      }
+      else{
+         user.senha = "123456";
+         arquivo.update(user);
+        
+         clear();
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("SENHA TEMPORÁRIA CRIADA");
+         System.out.println();
+         System.out.println("SENHA ENVIADA PARA O EMAIL: "+email);
+         System.out.println();
+         System.out.println("SENHA: "+user.senha);
+         System.out.println();
+         System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
+         pause(leitor); 
+      } 
+   }
    /*
    main - funcao principal de acesso
    */
@@ -198,8 +245,12 @@ public class Acesso{
                   }
                   break;
                case 3:
-                  System.out.println("\nTeste esqueci senha");
-                  pause(leitor);
+                  try{
+                     esqueciSenha(leitor);
+                  }
+                  catch (Exception e){
+                     telaErro(leitor);
+                  }
                   break;
                default: 
                   System.out.println("\nEscolha Inválida");
