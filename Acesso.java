@@ -127,15 +127,20 @@ public class Acesso{
          String senha = leitor.nextLine();
          
          if(senha.equals(user.senha)){
-            clear();
-            System.out.println();
-            System.out.println(_NOME+" "+_VERSAO);
-            System.out.println("==================");
-            System.out.println();
-            System.out.println("AUTENTICAÇÃO REALIZADA COM SUCESSO");
-            System.out.println();
-            System.out.println("AGUARDE NOVIDADES");
-            pause(leitor); 
+            if(senha.equals("123456")){
+               novaSenha(leitor, user.getID());              
+            }
+            else{
+               clear();
+               System.out.println();
+               System.out.println(_NOME+" "+_VERSAO);
+               System.out.println("==================");
+               System.out.println();
+               System.out.println("AUTENTICAÇÃO REALIZADA COM SUCESSO");
+               System.out.println();
+               System.out.println("AGUARDE NOVIDADES");
+               pause(leitor); 
+            }
          }
          else{
             clear();
@@ -151,6 +156,56 @@ public class Acesso{
       } 
    }
 
+   /*
+   novaSenha - Realiza a troca da senha
+   @param Scanner, int id
+   */
+   public static void novaSenha(Scanner leitor, final int id) throws Exception{
+      clear();
+      System.out.println();
+      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println("==================");
+      System.out.println();
+      System.out.println("TROCA DE SENHA");
+      System.out.println();
+      
+      System.out.print("Senha atual: ");
+      String senha_atual = leitor.nextLine();
+      System.out.print("\nNova senha: ");
+      String nova_senha = leitor.nextLine();
+      System.out.print("\nConfirme a nova senha: ");
+      String nova_senha2 = leitor.nextLine();
+       
+      Usuario user = arquivo.read(id);
+   
+      if(!nova_senha.equals(nova_senha2) || !senha_atual.equals(user.senha)){
+         clear();
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("SENHAS INCORRETAS");
+         System.out.println();
+         System.out.println("TENTE NOVAMENTE");
+         pause(leitor);
+         novaSenha(leitor, id);
+      }
+      else{
+         user.senha = nova_senha;
+         arquivo.update(user);
+        
+         clear();
+         System.out.println();
+         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println("==================");
+         System.out.println();
+         System.out.println("SENHA ATUALIZADA COM SUCESSO");
+         System.out.println();
+         System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
+         pause(leitor); 
+      } 
+   }
+   
    /*
    novoUsuario - cadastra um novo usuário
    @param Scanner
@@ -202,7 +257,6 @@ public class Acesso{
          if(confirmacao.contains("S")){
             Usuario novo = new Usuario(-1, nome, email, senha);
             arquivo.create(novo);
-
             clear();
             System.out.println();
             System.out.println(_NOME+" "+_VERSAO);
