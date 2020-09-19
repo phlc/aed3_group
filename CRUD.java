@@ -22,7 +22,7 @@ import java.io.EOFException;
 import java.lang.reflect.Constructor;
 import java.io.RandomAccessFile;
 import java.io.File;
-import aed3.*;
+import aed3.*; 
 
 class CRUD <T extends Registro>{
 //atributos da classe
@@ -37,7 +37,7 @@ class CRUD <T extends Registro>{
    private Lista_Apagados apagados;
 
 //construtor
-   CRUD(Constructor<T> constructor, String file) throws Exception{
+   CRUD(Constructor<T> constructor, String file) throws Exception, MyException{
       //Construtor
       this.constructor = constructor;
 
@@ -49,7 +49,7 @@ class CRUD <T extends Registro>{
          arq.seek(0L);
          String nome = arq.readUTF();
          if (!nome.equals(NAME_VERSION))
-            throw new Exception("Arquivo !CRUD2.0");
+            throw new MyException(MyException.INVALID_FILE);
          
       }
 
@@ -108,7 +108,7 @@ class CRUD <T extends Registro>{
          arq.seek(pos);
          //verificar se de fato o registro está apagado
          if (0 == arq.readByte())
-            throw new Exception ("Arquivos Inconsistentes CRUDxApagados");
+            throw new MyException (MyException.INCONSISTENT_FILE);
          
          //alterar lápide
          arq.seek(pos);
@@ -219,7 +219,7 @@ class CRUD <T extends Registro>{
             arq.seek(pos);
             //verificar se de fato o registro está apagado
             if (0 == arq.readByte())
-               throw new Exception ("Arquivos Inconsistentes CRUDxApagados");
+               throw new MyException (MyException.INCONSISTENT_FILE);
          
             //alterar lápide
             arq.seek(pos);
@@ -254,10 +254,15 @@ class CRUD <T extends Registro>{
    @param int id
    @return boolean true (sucesso) false (falha)
    */
-   public boolean delete(int id) throws Exception{  
+   public boolean delete(int id) throws MyException, Exception{  
       //achar registro
       long pos = direto.read(id);
-      arq.seek(pos);
+      
+      try{
+         arq.seek(pos);
+      }catch(Exception e){
+         throw new MyException(MyException.INVALID_REGISTER);
+      }
 
       //carregar para objeto 
       T objeto = this.constructor.newInstance(); 
@@ -269,9 +274,9 @@ class CRUD <T extends Registro>{
       
       //verificar se registro ja esta apagado
       if(lapide != 0)
-         throw new Exception("Registro inexistente");
+         throw new MyException(MyException.INVALID_REGISTER);
+      
       else{
-         
          //apagar registro
          arq.seek(pos);
          arq.writeByte(1);
