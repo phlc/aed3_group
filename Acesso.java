@@ -188,7 +188,6 @@ public class Acesso{
          System.out.println();
          System.out.println("TENTE NOVAMENTE");
          pause(leitor);
-         novaSenha(leitor, id);
       }
       else{
          user.senha = nova_senha;
