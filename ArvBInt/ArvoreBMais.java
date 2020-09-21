@@ -64,14 +64,14 @@ class ArvoreBMais{
             dos.writeLong(filhos[i]);
 
             // Completa o restante da página com registros vazios
-            byte[] registroVazio = new byte[8];
-            while(i < this.registros-1){
-                dos.write(registroVazio);
+            while(i < this.registros){
+                dos.writeInt(-1);
+                dos.writeInt(-1);
                 dos.writeLong(filhos[i+1]);
                 i++;
             }
 
-            dos.writeLong(filhos[i]);//Escrever ponteiro para página irmã
+            dos.writeLong(proxima);//Escrever ponteiro para página irmã
             return bos.toByteArray();
         }
 
@@ -127,6 +127,7 @@ class ArvoreBMais{
      * @return boolean resp
      */
     public boolean create(int chave, int dado)throws Exception{
+        System.out.println(arq.length());
         arq.seek(0);
         long pagina = arq.readLong();//Ler raiz
         
@@ -223,7 +224,7 @@ class ArvoreBMais{
                     int meio = this.maxElementos/2;
                     //Copiar primeiro filho dos maiores
 
-                    for(int j = 0; j < this.maxElementos-meio; j++){
+                    for(int j = 0; j < (this.maxElementos-meio); j++){
                         nova.chaves[j] = pa.chaves[j+meio];
                         nova.dados[j] = pa.dados[j+meio];
                         nova.filhos[j+1] = pa.filhos[j+1+meio];
@@ -270,7 +271,7 @@ class ArvoreBMais{
                     }else{//Posição de inserção no lado esquerdo
 
                         int j;
-                        for( j = nova.n; j > 0 && chaveAux < nova.chaves[j-1]; j--){
+                        for( j = this.maxElementos - meio; j > 0 && chaveAux < nova.chaves[j-1]; j--){
                             nova.chaves[j] = nova.chaves[j-1];
                             nova.dados[j] = nova.dados[j-1];
                             nova.filhos[j+1] = nova.filhos[j];
@@ -303,14 +304,17 @@ class ArvoreBMais{
                         }
                         
                     }
-
+                    //System.out.println(arq.length());
                     if(pa.filhos[0]==-1) {
-                        nova.proxima=pa.proxima;
+                        System.out.println("Entrou");
+                        nova.proxima= pa.proxima;
+                        //System.out.println(arq.length());
                         pa.proxima = arq.length();
                     }
-                    
-                    paginaAux = arq.length();
-                    arq.seek(paginaAux);
+                    System.out.println("Nova"+nova.proxima);
+                    System.out.println("Pa"+pa.proxima);
+                    this.paginaAux = arq.length();
+                    arq.seek(this.paginaAux);
                     arq.write(nova.getByteArray());
 
                     arq.seek(pagAtual);
