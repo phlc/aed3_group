@@ -12,6 +12,7 @@ Tarcila Fernanda Resende da Silva
  * FALTAM MUITOS MÉTODOS AINDA
  */
 
+import java.net.StandardSocketOptions;
 import java.util.Scanner;
 
 public class Menu {
@@ -23,13 +24,15 @@ public class Menu {
                                     + "\nOpção:";
   
    public static String menuPerguntas= "\nPERGUNTAS\n" + "\n[1] Criação de perguntas\n" + "[2] Consultar/"
-                                       + "responder perguntas\n" //+ "[3] Notificações: getNotificacoes" 
+                                       + "Responder perguntas\n" //+ "[3] Notificações: getNotificacoes" 
                                        + "\n[0] Sair\n" + "\nOpção:";
 
    public static String mensagemErro = "\nERRO\n" + "\nDesculpe, ocorreu um" + "erro inesperado\n" 
                                        + "TENTE NOVAMENTE MAIS TARDE";
 
    private static Usuario online;
+
+   //funcoes da interface
 
    /*
    clear - limpa a tela do terminal
@@ -38,7 +41,6 @@ public class Menu {
       System.out.print("\033[H\033[2J");  
       System.out.flush();  
    }
-
 
    /*
     * telaInicial - Apresenta a tela inicial
@@ -66,7 +68,7 @@ public class Menu {
    }
 
    public static Usuario login(){
-      
+      Acesso.acessoSistema();
    }
 
 

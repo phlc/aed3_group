@@ -1,4 +1,9 @@
 /*
+
+----------------------------------------------------
+EM PROCESSO DE MODIFICAÇÃO PARA A PARTE 4 DO PROJETO
+----------------------------------------------------
+
 Ciencia da Computacao - Pucminas
 AED3 - manha
 Larissa Domingues Gomes
@@ -14,16 +19,16 @@ import java.util.Scanner;
 Classe Acesso - Gerenciador de acesso ao Sistema de Perguntas
 */
 public class Acesso{
+
    //atributos estaticos da classe
    private static String _NOME = "PERGUNTAS";
    private static String _VERSAO = "1.0";
-   private static CRUD<Usuario> arquivo;
-   
 
+   private static CRUD<Usuario> arquivo;
 
    /*
-   telaInicial - Apresenta a tela inicial
-   */
+   telaInicial - Apresenta a tela inicial -- nao utilizada
+
    public static void telaInicial(){
       System.out.println();
       System.out.println(_NOME+" "+_VERSAO);
@@ -39,9 +44,18 @@ public class Acesso{
       System.out.println();
       System.out.print("Opção: ");
    }  
+   */
+
+   public static String getNome(){
+       return _NOME;
+   }
+
+   public static String getVersao(){
+       return _VERSAO;
+   }
 
    /*
-   telaErro - Apresenta tela de erro
+   telaErro - Apresenta tela de erro -- nao utilizada
    @Scanner leitor
    */
    public static void telaErro(Scanner leitor){
@@ -58,7 +72,7 @@ public class Acesso{
    }
 
    /*
-   telaFinal - Apresenta tela final
+   telaFinal - Apresenta tela final -- nao utilizada
    @Scanner leitor
    */
    public static void telaFinal(Scanner leitor){
@@ -98,6 +112,7 @@ public class Acesso{
    @param Scanner
    */
    public static void acessoSistema(Scanner leitor) throws Exception{
+
       clear();
       System.out.println();
       System.out.println(_NOME+" "+_VERSAO);
@@ -105,6 +120,7 @@ public class Acesso{
       System.out.println();
       System.out.println("ACESSO AO SISTEMA");
       System.out.println();
+
       
       System.out.print("E-mail: ");
       String email = leitor.nextLine();
@@ -138,7 +154,7 @@ public class Acesso{
                System.out.println();
                System.out.println("AUTENTICAÇÃO REALIZADA COM SUCESSO");
                System.out.println();
-               System.out.println("AGUARDE NOVIDADES");
+               //System.out.println("AGUARDE NOVIDADES");
                pause(leitor); 
             }
          }
