@@ -24,13 +24,14 @@ Classe Usuario
 
 class Pergunta implements Registro{
    //atributos estaticos
-   private static Date data;
-   private static SimpleDateFormat formatter;
-   private static ArvoreBMais_Int_Int indice;
-   private static CRUD<Pergunta> arquivo;
+   public static Date data;
+   public static SimpleDateFormat formatter;
+   public static ArvoreBMais_Int_Int indice;
+   public static CRUD<Pergunta> arquivo;
 
    //metodos estaticos
-   public static ArrayList<String> getListagem(int idUsuario) throws Exception{
+   //obter listagem de perguntas feitas por um usuário
+   public static ArrayList<String> getList(int idUsuario) throws Exception{
       ArrayList<String> lista = new ArrayList<String>();
       int c = 1;
       int[] dados = indice.read(idUsuario);
@@ -43,6 +44,11 @@ class Pergunta implements Registro{
       return lista;
    }
 
+   //criar pergunta no indice quando criar no arquivo principal
+   public static void createAtIndex(int userId, Pergunta p) throws IOException{
+      indice.create(userId, p.idPergunta);
+   }
+
    //atributos
    public int idUsuario; //chave de busca
    private int idPergunta; //dado
@@ -51,12 +57,12 @@ class Pergunta implements Registro{
    public String pergunta;
    public boolean ativa;
 
-//contrutores
-   public Pergunta() throws IOException{
+   //construtores
+   public Pergunta(){
       this(-1, -1, -1, Short.MIN_VALUE, "", false);
    }
 
-   public Pergunta(int _idPergunta, int _idUsuario, long _criacao, short _nota, String _pergunta, boolean _ativa) throws IOException{
+   public Pergunta(int _idPergunta, int _idUsuario, long _criacao, short _nota, String _pergunta, boolean _ativa){
       this.idUsuario = _idUsuario;
       this.idPergunta = _idPergunta;
       this.criacao = _criacao;
