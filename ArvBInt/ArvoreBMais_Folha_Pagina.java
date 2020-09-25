@@ -14,9 +14,17 @@ import java.io.*;
 Indice indireto entre ID de duas entidades
 
 Arquivo:
-   4 Bytes Ordem
-   8 Bytes Raiz
+- Cabeçalho
+   4 Bytes Ordem - int
+   8 Bytes Raiz - long
 
+- Folha
+   4 Bytes Tamanho - int
+   Dados - byte[]
+
+- Página
+   4 Bytes Tamanho - int
+   Dados - byte[]
 
 Objetos:
 - Árvore B+
@@ -27,12 +35,11 @@ Objetos:
    Tamanho da Página - Tamanho da Página em Bytes
 
 - Folha
-   Marcador de Folha - Indicador no arquivo 
    Número de Chaves
    Chaves|Dados
    Ponteiro Irmã
+
 - Página
-   Marcador de Folha
    Número de Chaves
    Ponteiro|Chave|Ponteiro
 */
@@ -46,7 +53,6 @@ class ArvoreBMais_Folha_Pagina{
    class Folha{
       
       //Atributos
-      final byte is_folha;
       protected int n_chaves;
       protected int[] chaves;
       protected int[] dados;
@@ -54,7 +60,6 @@ class ArvoreBMais_Folha_Pagina{
 
       //Construtor
       public Folha(){
-         this.is_folha = 1;
          this.n_chaves = 0;
          this.chaves = new int[MAX];
          this.dados = new int[MAX];
@@ -74,14 +79,12 @@ class ArvoreBMais_Folha_Pagina{
    class Pagina{
       
       //Atributos
-      final byte is_folha;
       protected int n_chaves;
       protected long[] ponteiros;
       protected int[] chaves;
 
       //Construtor
       public Pagina(){
-         this.is_folha = 0;
          this.n_chaves = 0;
          this.ponteiros = new long[ORDEM];
          this.chaves = new int[MAX];
@@ -109,8 +112,8 @@ class ArvoreBMais_Folha_Pagina{
       arq = new RandomAcessFile(nome, "rws");
       this.ORDEM = ordem;
       this.MAX = ORDEM -1;
-      this.TAM_FOLHA = 1 + 4 + MAX*4 + MAX*4 + 8;
-      this.TAM_PAGINA = 1 + 4 + ORDEM*8 + MAX*4;     
+      this.TAM_FOLHA = 4 + MAX*4 + MAX*4 + 8;
+      this.TAM_PAGINA = 4 + ORDEM*8 + MAX*4;     
 
       if (arq.length() < 12){
          arq.seek(0);
@@ -133,8 +136,8 @@ class ArvoreBMais_Folha_Pagina{
          int ordem = readInt();
          this.ORDEM = ordem;
          this.MAX = ORDEM -1;;
-         this.TAM_FOLHA = 1 + 4 + MAX*4 + MAX*4 + 8;
-         this.TAM_PAGINA = 1 + 4 + ORDEM*8 + MAX*4;     
+         this.TAM_FOLHA = 4 + MAX*4 + MAX*4 + 8;
+         this.TAM_PAGINA = 4 + ORDEM*8 + MAX*4;     
       }
    }
 
@@ -159,20 +162,17 @@ class ArvoreBMais_Folha_Pagina{
    private byte[] read (int chave, long endereco)throws Exception{
       byte[] resp = null;
       arq.seek(endereco);
-      byte is_folha = arq.readByte();
+      int tamanho = arq.readInt();
       
       //Se for Pagina
-      if(is_folha == 0){
+      if(tamanho == TAM_PAGINA){
          
          //Preencher Página
          Pagina pg = new Pagina();
-         pg.n_chaves = arq.readInt();
-         for(int i=0; i<MAX; i++){
-            pg.ponteiros[i] = arq.readLong();
-            pg.chaves[i] = arq.readInt();
-         }
-         pg.ponteiros[MAX] = arq.readLong();
-         
+         byte[] dados = new byte[TAM_PAGINA];
+         pg.read(dados);
+         pg.fromByteArray(dados);     
+    
          //Verificar por onde descer
          long descida = pg.ponteiros[0];
          for(int i=0; i<MAX && pg.chaves[i] != -1 && chave >= pg.chaves[i]; i++){
@@ -185,10 +185,12 @@ class ArvoreBMais_Folha_Pagina{
       }
 
       //Se for Folha
-      else{
+      else if(tamanho == TAM_FOLHA){
          
-         //Preencher Folha
-         Folha fl = new Folha();
+         
+      }
+      else{
+         throw new Exception("READ - Tamanho Incompatível");
       }
 
       return resp;
