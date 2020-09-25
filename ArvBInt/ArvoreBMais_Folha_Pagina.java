@@ -138,5 +138,61 @@ class ArvoreBMais_Folha_Pagina{
       }
    }
 
+   //Metodos
+   /*
+   read - Busca o conjunto da dados de uma respectiva chava
+   @param int chave
+   @return int[] dados
+   */
+   public byte[] read (int chave)throws Exception{
+      byte[] resp = null;
+      arq.seek(RAIZ);
+      long raiz = arq.readInt();
+      if(raiz != -1)
+         resp = read(chave, raiz);
+      return resp;
+   }
+   /*
+   read - overload
+   @param int chave long endereco
+   */
+   private byte[] read (int chave, long endereco)throws Exception{
+      byte[] resp = null;
+      arq.seek(endereco);
+      byte is_folha = arq.readByte();
+      
+      //Se for Pagina
+      if(is_folha == 0){
+         
+         //Preencher Página
+         Pagina pg = new Pagina();
+         pg.n_chaves = arq.readInt();
+         for(int i=0; i<MAX; i++){
+            pg.ponteiros[i] = arq.readLong();
+            pg.chaves[i] = arq.readInt();
+         }
+         pg.ponteiros[MAX] = arq.readLong();
+         
+         //Verificar por onde descer
+         long descida = pg.ponteiros[0];
+         for(int i=0; i<MAX && pg.chaves[i] != -1 && chave >= pg.chaves[i]; i++){
+            descida = pg.ponteiros[i+1];
+            if (chave == pg.chaves[i])
+               i = MAX;
+         }
+   
+         resp = read(chave, descida);
+      }
+
+      //Se for Folha
+      else{
+         
+         //Preencher Folha
+         Folha fl = new Folha();
+      }
+
+      return resp;
+   }
+
 }//fim da Classe ArvoreBMais_Folha_Pagina
 
