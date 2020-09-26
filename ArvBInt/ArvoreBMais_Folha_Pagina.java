@@ -8,6 +8,7 @@ Tarcila Fernanda Resende da Silva
 */
 
 import java.io.*;
+import java.util.ArrayList;
 
 /*
 Árvore B+ Int - Int 
@@ -71,6 +72,42 @@ class ArvoreBMais_Folha_Pagina{
          }
 
       }
+      
+      //metodos
+      /*
+      toByteArray - transforma os dados da Folha em um arranho de bytes
+      @return byte[]
+      */
+      protected byte[] toByteArray() throws Exception{
+         ByteArrayOutputStream ba = new ByteArrayOutputStream();
+         DataOutputStream da = new DataOutputStream(ba);
+
+         da.writeInt(n_chaves);
+         for(int i=0; i<MAX; i++){
+            da.writeInt(this.chaves[i]);
+            da.writeInt(this.dados[i]);
+         }
+         da.writeLong(this.irma);
+         
+         return ba.toByteArray();
+      }
+
+      /*
+      fromByteArray - preenche uma Folha com os dados de uma arranho de byte
+      @param byte[]
+      */
+      protected void fromByteArray(byte[] data) throws Exception{
+         ByteArrayInputSream ba = new ByteArrayInputStream(data);
+         DataInputStream da = new DataInputeStream(ba);
+
+         this.n = da.readInt();
+         for(int i=0; i<MAX; i++){
+            this.chaves[i] = da.readInt();
+            this.dados[i] = da.readInt();
+         }
+         this.irma = da.readLong();
+      }
+
    }
 //--------- Pagina ------------
    /*
@@ -94,6 +131,41 @@ class ArvoreBMais_Folha_Pagina{
             this.chaves[i] = -1;
          }
          this.ponteiros[MAX] = -1;
+      }
+      
+       //metodos
+      /*
+      toByteArray - transforma os dados da Pagina em um arranho de bytes
+      @return byte[]
+      */
+      protected byte[] toByteArray() throws Exception{
+         ByteArrayOutputStream ba = new ByteArrayOutputStream();
+         DataOutputStream da = new DataOutputStream(ba);
+
+         da.writeInt(n_chaves);
+         for(int i=0; i<MAX; i++){
+            da.writeLong(this.ponteiros[i]);
+            da.writeInt(this.chaves[i]);
+         }
+         da.writeLong(this.ponteiros[MAX]);
+         
+         return ba.toByteArray();
+      }
+
+      /*
+      fromByteArray - preenche uma Folha com os dados de uma arranho de byte
+      @param byte[]
+      */
+      protected void fromByteArray(byte[] data) throws Exception{
+         ByteArrayInputSream ba = new ByteArrayInputStream(data);
+         DataInputStream da = new DataInputeStream(ba);
+
+         this.n = da.readInt();
+         for(int i=0; i<MAX; i++){
+            this.ponteiros[i] = da.readLong();
+            this.chaves[i] = da.readInt();
+         }
+         this.ponteiros[MAX] = da.readLong();
       }
    }
 //--------- Árvore ------------
@@ -148,7 +220,7 @@ class ArvoreBMais_Folha_Pagina{
    @return int[] dados
    */
    public byte[] read (int chave)throws Exception{
-      byte[] resp = null;
+      byte[] resp = new int[0];
       arq.seek(RAIZ);
       long raiz = arq.readInt();
       if(raiz != -1)
@@ -160,7 +232,7 @@ class ArvoreBMais_Folha_Pagina{
    @param int chave long endereco
    */
    private byte[] read (int chave, long endereco)throws Exception{
-      byte[] resp = null;
+      byte[] resp = new int[0];
       arq.seek(endereco);
       int tamanho = arq.readInt();
       
@@ -169,16 +241,14 @@ class ArvoreBMais_Folha_Pagina{
          
          //Preencher Página
          Pagina pg = new Pagina();
-         byte[] dados = new byte[TAM_PAGINA];
-         pg.read(dados);
-         pg.fromByteArray(dados);     
+         byte[] data = new byte[TAM_PAGINA];
+         arq.read(data);
+         pg.fromByteArray(data);     
     
          //Verificar por onde descer
          long descida = pg.ponteiros[0];
-         for(int i=0; i<MAX && pg.chaves[i] != -1 && chave >= pg.chaves[i]; i++){
+         for(int i=0; i<pg.n_chaves && chave>pg.chaves[i]; i++){
             descida = pg.ponteiros[i+1];
-            if (chave == pg.chaves[i])
-               i = MAX;
          }
    
          resp = read(chave, descida);
@@ -187,7 +257,25 @@ class ArvoreBMais_Folha_Pagina{
       //Se for Folha
       else if(tamanho == TAM_FOLHA){
          
+         //Preencher Folha
+         Folha fa = new Folha();
+         byte[] data = new byte[TAM_FOLHA];
+         arq.read(data);
+         fa.fromByteArray(data);
+
+         //Localizar chave
+         int indice = 0
+         ArrayList lista = new ArrayList();         
+
+         while(indice<fa.n_chave && chave!=pg.chaves[indice]){
+            indice++;
+         }
          
+         if(indice<fa.n_chave && chave==fa.chaves[indice]){
+            fillArrayList(lista, indice, fa);
+         }
+         
+         resp = lista.toArray();
       }
       else{
          throw new Exception("READ - Tamanho Incompatível");
@@ -195,6 +283,20 @@ class ArvoreBMais_Folha_Pagina{
 
       return resp;
    }
-
+   
+   /*
+   fillArrayList - preenche o ArryList com os dados da chave procurada
+   @ArrayList lista, int indice, Folha fa
+   */
+   private void fillArrayList(ArrayList lista, int indice, Folha fa){
+      while(indice<fa.n_chave && chave==fa.chaves[indice]){
+         lista.add(fa.dados[indice]);
+      }
+      if(indice==MAX && fa.irma!=-1){
+         arq.seek(fa.irma);
+         
+      }
+   }
+   
 }//fim da Classe ArvoreBMais_Folha_Pagina
 
