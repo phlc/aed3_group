@@ -8,7 +8,7 @@ Tarcila Fernanda Resende da Silva
 */
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
 /*
 Árvore B+ Int - Int 
@@ -75,6 +75,17 @@ class ArvoreBMais_Folha_Pagina{
       
       //metodos
       /*
+      print - mostra a Folha   
+      */
+      protected void print(){
+         System.out.print("Folha(n_chaves: "+this.n_chaves+" |");
+         for (int i=0; i<MAX; i++){
+            System.out.print(" ch: "+this.chaves[i]+" dado: "+this.dados[i]+" |");
+         }
+         System.out.println(" Irmã: "+this.irma+" )");
+      }   
+   
+      /*
       toByteArray - transforma os dados da Folha em um arranho de bytes
       @return byte[]
       */
@@ -97,10 +108,10 @@ class ArvoreBMais_Folha_Pagina{
       @param byte[]
       */
       protected void fromByteArray(byte[] data) throws Exception{
-         ByteArrayInputSream ba = new ByteArrayInputStream(data);
-         DataInputStream da = new DataInputeStream(ba);
+         ByteArrayInputStream ba = new ByteArrayInputStream(data);
+         DataInputStream da = new DataInputStream(ba);
 
-         this.n = da.readInt();
+         this.n_chaves = da.readInt();
          for(int i=0; i<MAX; i++){
             this.chaves[i] = da.readInt();
             this.dados[i] = da.readInt();
@@ -133,7 +144,18 @@ class ArvoreBMais_Folha_Pagina{
          this.ponteiros[MAX] = -1;
       }
       
-       //metodos
+      //metodos
+      /*
+      print - mostra a Pagina   
+      */
+      protected void print(){
+         System.out.print("Página(n_chaves: "+this.n_chaves+" |");
+         for (int i=0; i<MAX; i++){
+            System.out.print(" p: "+this.ponteiros[i]+" ch: "+this.chaves[i]+" |");
+         }
+         System.out.println(" p: "+this.ponteiros[MAX]+" )");
+      }
+   
       /*
       toByteArray - transforma os dados da Pagina em um arranho de bytes
       @return byte[]
@@ -157,10 +179,10 @@ class ArvoreBMais_Folha_Pagina{
       @param byte[]
       */
       protected void fromByteArray(byte[] data) throws Exception{
-         ByteArrayInputSream ba = new ByteArrayInputStream(data);
-         DataInputStream da = new DataInputeStream(ba);
+         ByteArrayInputStream ba = new ByteArrayInputStream(data);
+         DataInputStream da = new DataInputStream(ba);
 
-         this.n = da.readInt();
+         this.n_chaves = da.readInt();
          for(int i=0; i<MAX; i++){
             this.ponteiros[i] = da.readLong();
             this.chaves[i] = da.readInt();
@@ -181,7 +203,7 @@ class ArvoreBMais_Folha_Pagina{
 
    //Construtor
    public ArvoreBMais_Folha_Pagina(String nome, int ordem)throws Exception{
-      arq = new RandomAcessFile(nome, "rws");
+      arq = new RandomAccessFile(nome, "rws");
       this.ORDEM = ordem;
       this.MAX = ORDEM -1;
       this.TAM_FOLHA = 4 + MAX*4 + MAX*4 + 8;
@@ -193,19 +215,19 @@ class ArvoreBMais_Folha_Pagina{
          arq.writeLong(-1);
       } else {
          arq.seek(0);
-         int ordem = readInt();
-         if(ordem != ORDEM)
+         int fordem = arq.readInt();
+         if(fordem != ORDEM)
             throw new Exception("Ordem Arquivo Incompatível");
       }
    }
 
    public ArvoreBMais_Folha_Pagina(String nome) throws Exception{
-      arq = new RandomAcessFile(nome, "rws");
+      arq = new RandomAccessFile(nome, "rws");
       if (arq.length() < 12)
          throw new Exception("Ordem Necessária para Criar Novo Arquivo");
       else{
          arq.seek(0);
-         int ordem = readInt();
+         int ordem = arq.readInt();
          this.ORDEM = ordem;
          this.MAX = ORDEM -1;;
          this.TAM_FOLHA = 4 + MAX*4 + MAX*4 + 8;
@@ -214,15 +236,18 @@ class ArvoreBMais_Folha_Pagina{
    }
 
    //Metodos
+
+//--------- Read ---------
+
    /*
    read - Busca o conjunto da dados de uma respectiva chava
    @param int chave
    @return int[] dados
    */
-   public byte[] read (int chave)throws Exception{
-      byte[] resp = new int[0];
+   public int[] read (int chave)throws Exception{
+      int[] resp = new int[0];
       arq.seek(RAIZ);
-      long raiz = arq.readInt();
+      long raiz = arq.readLong();
       if(raiz != -1)
          resp = read(chave, raiz);
       return resp;
@@ -231,11 +256,11 @@ class ArvoreBMais_Folha_Pagina{
    read - overload
    @param int chave long endereco
    */
-   private byte[] read (int chave, long endereco)throws Exception{
-      byte[] resp = new int[0];
+   private int[] read (int chave, long endereco)throws Exception{
+      int[] resp = new int[0];
       arq.seek(endereco);
       int tamanho = arq.readInt();
-      
+
       //Se for Pagina
       if(tamanho == TAM_PAGINA){
          
@@ -264,18 +289,21 @@ class ArvoreBMais_Folha_Pagina{
          fa.fromByteArray(data);
 
          //Localizar chave
-         int indice = 0
-         ArrayList lista = new ArrayList();         
+         int indice = 0;
+         List<Integer> lista = new ArrayList<Integer>();         
 
-         while(indice<fa.n_chave && chave!=pg.chaves[indice]){
+         while(indice<fa.n_chaves && chave!=fa.chaves[indice]){
             indice++;
          }
          
-         if(indice<fa.n_chave && chave==fa.chaves[indice]){
-            fillArrayList(lista, indice, fa);
+         if(indice<fa.n_chaves && chave==fa.chaves[indice]){
+            fillArrayList(chave, lista, indice, fa);
          }
          
-         resp = lista.toArray();
+         resp = new int[lista.size()];
+         for (int i=0; i<resp.length; i++){
+            resp[i] = lista.get(i).intValue();
+         }
       }
       else{
          throw new Exception("READ - Tamanho Incompatível");
@@ -286,10 +314,10 @@ class ArvoreBMais_Folha_Pagina{
    
    /*
    fillArrayList - preenche o ArryList com os dados da chave procurada
-   @ArrayList lista, int indice, Folha fa
+   @param int chave, List lista, int indice, Folha fa
    */
-   private void fillArrayList(ArrayList lista, int indice, Folha fa)throws Exception{
-      while(indice<fa.n_chave && chave==fa.chaves[indice]){
+   private void fillArrayList(int chave, List<Integer> lista, int indice, Folha fa)throws Exception{
+      while(indice<fa.n_chaves && chave==fa.chaves[indice]){
          lista.add(fa.dados[indice]);
          indice++;
       }
@@ -297,15 +325,60 @@ class ArvoreBMais_Folha_Pagina{
          arq.seek(fa.irma);
          int tamanho = arq.readInt();
          if(tamanho == TAM_FOLHA){
-            Folha fa = new Folha();
+            fa = new Folha();
             byte[] data = new byte[TAM_FOLHA];
             arq.read(data);
             fa.fromByteArray(data);
-            fillArrayList(lista, 0, fa);
+            fillArrayList(chave, lista, 0, fa);
          }
          else{
             throw new Exception("fillArrayList - Tamanho Irmã Incompatível");
          } 
+      }
+   }
+
+//------- Create ---------
+
+   /*
+   Create - Cria no arquivo um novo registro de chave | dado
+   @param int chave, int dado
+   @return boolean sucesso
+   */
+   public boolean create(int chave, int dado)throws Exception{
+      boolean sucesso = false;
+      if(!(chave<0) && !(dado<0)){
+         arq.seek(RAIZ);
+         long raiz = arq.readLong();
+         if(raiz == -1){
+            Folha fa = new Folha();
+            fa.n_chaves = 1;
+            fa.chaves[0] = chave;
+            fa.dados[0] = dado;
+         
+            raiz = arq.length();
+            arq.seek(raiz);
+            arq.writeInt(TAM_FOLHA);
+            arq.write(fa.toByteArray());
+         
+            arq.seek(RAIZ);
+            arq.writeLong(raiz);
+         }
+      }
+      return sucesso;
+   }
+
+//------ Main para Teste -----
+   public static void main(String[] args)throws Exception{
+      ArvoreBMais_Folha_Pagina arvore = new ArvoreBMais_Folha_Pagina("teste.db", 5);
+      arvore.create(2, 2);
+      int[] resp = arvore.read(1);
+      if(resp.length > 0){
+         for(int i=0; i<resp.length; i++){
+            System.out.println(resp[i]);
+         }
+      }
+      else{
+         System.out.println("Chave não encontrada");
       }
    }
    
