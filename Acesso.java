@@ -1,4 +1,9 @@
 /*
+
+----------------------------------------------------
+EM PROCESSO DE MODIFICAÇÃO PARA A PARTE 4 DO PROJETO
+----------------------------------------------------
+
 Ciencia da Computacao - Pucminas
 AED3 - manha
 Larissa Domingues Gomes
@@ -14,16 +19,14 @@ import java.util.Scanner;
 Classe Acesso - Gerenciador de acesso ao Sistema de Perguntas
 */
 public class Acesso{
-   //atributos estaticos da classe
-   private static String _NOME = "PERGUNTAS";
-   private static String _VERSAO = "1.0";
-   private static CRUD<Usuario> arquivo;
-   
 
+   //atributos estaticos da classe
+
+   public static CRUD<Usuario> arquivo;
 
    /*
-   telaInicial - Apresenta a tela inicial
-   */
+   telaInicial - Apresenta a tela inicial -- nao utilizada
+
    public static void telaInicial(){
       System.out.println();
       System.out.println(_NOME+" "+_VERSAO);
@@ -39,11 +42,12 @@ public class Acesso{
       System.out.println();
       System.out.print("Opção: ");
    }  
+   */
 
    /*
-   telaErro - Apresenta tela de erro
+   telaErro - Apresenta tela de erro -- nao utilizada
    @Scanner leitor
-   */
+   
    public static void telaErro(Scanner leitor){
       clear();
       System.out.println();
@@ -56,11 +60,11 @@ public class Acesso{
       System.out.println();
       pause(leitor);
    }
-
-   /*
-   telaFinal - Apresenta tela final
-   @Scanner leitor
    */
+   /*
+   telaFinal - Apresenta tela final -- nao utilizada
+   @Scanner leitor
+   
    public static void telaFinal(Scanner leitor){
       clear();
       System.out.println();
@@ -73,53 +77,35 @@ public class Acesso{
       System.out.println();
       pause(leitor);
    }
-
-   /*
-   pause - realiza uma pausa até novo input
-   @param Scanner
    */
-   public static void pause(Scanner leitor){
-      System.out.println();
-      System.out.println("Aperte ENTER para Continuar");
-      System.out.println();
-      leitor.nextLine();
-   }
-
-   /*
-   clear - limpa a tela do terminal
-   */
-   public static void clear(){
-      System.out.print("\033[H\033[2J");  
-      System.out.flush();  
-   }
-
    /*
    acessoSistem - Gerencia o acesso ao Sistema
    @param Scanner
    */
-   public static void acessoSistema(Scanner leitor) throws Exception{
-      clear();
+   public static Usuario acessoSistema(Scanner leitor) throws Exception{
+      Menu.clear();
+      Usuario user = null;
       System.out.println();
-      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println(Menu.getNome()+" "+Menu.getVersao());
       System.out.println("==================");
       System.out.println();
       System.out.println("ACESSO AO SISTEMA");
       System.out.println();
-      
+
       System.out.print("E-mail: ");
       String email = leitor.nextLine();
 
-      Usuario user = arquivo.read(email);
+      user = arquivo.read(email);
       if(user == null){
-         clear();
+         Menu.clear();
          System.out.println();
-         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println(Menu.getNome()+" "+Menu.getVersao());
          System.out.println("==================");
          System.out.println();
-         System.out.println("USUÁRIO NÃO CADASTRADO");
+         System.out.println("Usuário não cadastrado");
          System.out.println();
-         System.out.println("SELECIONE OPÇÃO (2) PARA CRIAR USUÁRIO");
-         pause(leitor);
+         System.out.println("SELECIONE OPÇÃO [2] PARA CRIAR USUÁRIO");
+         Menu.pause(leitor);
       }
       else{
          System.out.println();
@@ -127,33 +113,33 @@ public class Acesso{
          String senha = leitor.nextLine();
          
          if(senha.equals(user.senha)){
-            if(senha.equals("123456")){
+            if(senha.equals("123456")){ //se a senha do usuário é uma senha temporária
                novaSenha(leitor, user.getID());              
             }
-            else{
-               clear();
+            else{  
+               Menu.clear();
                System.out.println();
-               System.out.println(_NOME+" "+_VERSAO);
+               System.out.println(Menu.getNome()+" "+Menu.getVersao());
                System.out.println("==================");
                System.out.println();
                System.out.println("AUTENTICAÇÃO REALIZADA COM SUCESSO");
                System.out.println();
-               System.out.println("AGUARDE NOVIDADES");
-               pause(leitor); 
+               Menu.pause(leitor); 
             }
          }
          else{
-            clear();
+            Menu.clear();
             System.out.println();
-            System.out.println(_NOME+" "+_VERSAO);
+            System.out.println(Menu.getNome()+" "+Menu.getVersao());
             System.out.println("==================");
             System.out.println();
             System.out.println("SENHA INCORRETA");
             System.out.println();
-            System.out.println("CASO TENHA ESQUECIDO A SENHA SELECIONE OPÇÃO (3)");
-            pause(leitor);
+            System.out.println("CASO TENHA ESQUECIDO A SENHA SELECIONE OPÇÃO [3]");
+            Menu.pause(leitor);
          }
-      } 
+      }
+      return user; 
    }
 
    /*
@@ -161,9 +147,9 @@ public class Acesso{
    @param Scanner, int id
    */
    public static void novaSenha(Scanner leitor, final int id) throws Exception{
-      clear();
+      Menu.clear();
       System.out.println();
-      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println(Menu.getNome()+" "+Menu.getVersao());
       System.out.println("==================");
       System.out.println();
       System.out.println("TROCA DE SENHA");
@@ -179,30 +165,30 @@ public class Acesso{
       Usuario user = arquivo.read(id);
    
       if(!nova_senha.equals(nova_senha2) || !senha_atual.equals(user.senha)){
-         clear();
+         Menu.clear();
          System.out.println();
-         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println(Menu.getNome()+" "+Menu.getVersao());
          System.out.println("==================");
          System.out.println();
          System.out.println("SENHAS INCORRETAS");
          System.out.println();
          System.out.println("TENTE NOVAMENTE");
-         pause(leitor);
+         Menu.pause(leitor);
          novaSenha(leitor, id);
       }
       else{
          user.senha = nova_senha;
          arquivo.update(user);
         
-         clear();
+         Menu.clear();
          System.out.println();
-         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println(Menu.getNome()+" "+Menu.getVersao());
          System.out.println("==================");
          System.out.println();
          System.out.println("SENHA ATUALIZADA COM SUCESSO");
          System.out.println();
          System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
-         pause(leitor); 
+         Menu.pause(leitor); 
       } 
    }
    
@@ -211,9 +197,9 @@ public class Acesso{
    @param Scanner
    */
    public static void novoUsuario(Scanner leitor) throws Exception{
-      clear();
+      Menu.clear();
       System.out.println();
-      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println(Menu.getNome()+" "+Menu.getVersao());
       System.out.println("==================");
       System.out.println();
       System.out.println("NOVO USUÁRIO");
@@ -223,15 +209,15 @@ public class Acesso{
       String email = leitor.nextLine();
 
       if(arquivo.read(email) != null){
-         clear();
+         Menu.clear();
          System.out.println();
-         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println(Menu.getNome()+" "+Menu.getVersao());
          System.out.println("==================");
          System.out.println();
          System.out.println("USUÁRIO JÁ CADASTRADO");
          System.out.println();
          System.out.println("CASO TENHA ESQUECIDO A SENHA SELECIONE OPÇÃO (3)");
-         pause(leitor);
+         Menu.pause(leitor);
       }
       else{
          System.out.print("\nNome: ");
@@ -240,9 +226,9 @@ public class Acesso{
          System.out.print("\nSenha: ");
          String senha = leitor.nextLine();
         
-         clear();
+         Menu.clear();
          System.out.println();
-         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println(Menu.getNome()+" "+Menu.getVersao());
          System.out.println("==================");
          System.out.println();
          System.out.println("CONFIRME OS DADOS:");
@@ -257,15 +243,15 @@ public class Acesso{
          if(confirmacao.contains("S")){
             Usuario novo = new Usuario(-1, nome, email, senha);
             arquivo.create(novo);
-            clear();
+            Menu.clear();
             System.out.println();
-            System.out.println(_NOME+" "+_VERSAO);
+            System.out.println(Menu.getNome()+" "+Menu.getVersao());
             System.out.println("==================");
             System.out.println();
             System.out.println("USUÁRIO CADASTRADO COM SUCESSO");
             System.out.println();
             System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
-            pause(leitor);
+            Menu.pause(leitor);
          }
       } 
    }
@@ -275,9 +261,9 @@ public class Acesso{
    @param Scanner
    */
    public static void esqueciSenha(Scanner leitor) throws Exception{
-      clear();
+      Menu.clear();
       System.out.println();
-      System.out.println(_NOME+" "+_VERSAO);
+      System.out.println(Menu.getNome()+" "+Menu.getVersao());
       System.out.println("==================");
       System.out.println();
       System.out.println("RECUPERAÇÃO DA SENHA");
@@ -288,23 +274,23 @@ public class Acesso{
 
       Usuario user = arquivo.read(email);
       if(user == null){
-         clear();
+         Menu.clear();
          System.out.println();
-         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println(Menu.getNome()+" "+Menu.getVersao());
          System.out.println("==================");
          System.out.println();
          System.out.println("USUÁRIO NÃO CADASTRADO");
          System.out.println();
          System.out.println("SELECIONE OPÇÃO (2) PARA CRIAR USUÁRIO");
-         pause(leitor);
+         Menu.pause(leitor);
       }
       else{
          user.senha = "123456";
          arquivo.update(user);
         
-         clear();
+         Menu.clear();
          System.out.println();
-         System.out.println(_NOME+" "+_VERSAO);
+         System.out.println(Menu.getNome()+" "+Menu.getVersao());
          System.out.println("==================");
          System.out.println();
          System.out.println("SENHA TEMPORÁRIA CRIADA");
@@ -314,7 +300,7 @@ public class Acesso{
          System.out.println("SENHA: "+user.senha);
          System.out.println();
          System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
-         pause(leitor); 
+         Menu.pause(leitor); 
       } 
    }
 
