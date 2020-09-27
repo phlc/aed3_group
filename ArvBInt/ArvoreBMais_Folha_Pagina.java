@@ -112,7 +112,8 @@ class ArvoreBMais_Folha_Pagina{
             fa_irma = new Folha();
             int i = this.n_chaves -1;
             int j = this.n_chaves - this.n_chaves/2 -1;
-            for(; i>=n_chaves/2; i--, j--){
+            int limite = this.n_chaves/2;
+            for(; i>=limite; i--, j--){
                fa_irma.chaves[j] = this.chaves[i];
                this.chaves[i] = -1;
                fa_irma.dados[j] = this.dados[i];
@@ -444,10 +445,10 @@ class ArvoreBMais_Folha_Pagina{
 
                //Inserir dados na Folha
                Folha fa_irma = fa.inserir(chave, dado);
-fa.print();    
+
                //Se foi necessário criar outra Folha
                if(fa_irma != null){
-                  
+
                   //Escrever irma no arquivo
                   data = fa_irma.toByteArray();
                   long end_irma = arq.length();
@@ -478,6 +479,9 @@ fa.print();
                   //Escrever raiz em RAIZ
                   arq.seek(RAIZ);
                   arq.writeLong(raiz);
+fa.print();
+fa_irma.print();
+pg.print();
                }
                
                //Não foi necessário criar outra folha
@@ -491,6 +495,8 @@ fa.print();
             else{
                throw new Exception("CREATE - Tamnho Incompatível");     
             }
+               
+      
             sucesso = true;
          }
       }
@@ -541,6 +547,7 @@ fa.print();
       arvore.create(2, 2);
       arvore.create(0, 2);
       arvore.create(1, 10);
+      arvore.create(1, 12);
       arvore.create(1, 11);
       int[] resp = arvore.read(1);
       if(resp.length > 0){
