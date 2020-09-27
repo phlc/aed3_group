@@ -84,7 +84,50 @@ class ArvoreBMais_Folha_Pagina{
          }
          System.out.println(" Irmã: "+this.irma+" )");
       }   
-   
+
+      /*
+      inserir - insere um conjunto de chave | dado
+      @param int chave | int dado
+      @return Folha - se for necessário criar outra folha
+      */
+      private Folha inserir(int chave, int dado)throws Exception{
+         Folha fa_irma = null;
+         if(this.n_chaves < MAX){
+            int i;
+            for(i=this.n_chaves-1; i>=0; i--){
+               if(this.chaves[i]>chave || (this.chaves[i]==chave && this.dados[i]>dado)){
+                  this.chaves[i+1] = this.chaves[i];
+                  this.dados[i+1] = this.dados[i];
+               } 
+               else{      
+                  break;
+               }
+            }
+            this.chaves[i+1] = chave;
+            this.dados[i+1] = dado;
+            this.n_chaves++;
+
+         }
+         else if(this.n_chaves == MAX){
+            fa_irma = new Folha();
+            int i = this.n_chaves -1;
+            int j = this.n_chaves - this.n_chaves/2 -1;
+            for(; i>=n_chaves/2; i--, j--){
+               fa_irma.chaves[j] = this.chaves[i];
+               this.chaves[i] = -1;
+               fa_irma.dados[j] = this.dados[i];
+               this.dados[i] = -1;
+               fa_irma.n_chaves++;
+               this.n_chaves--;
+            }
+            fa_irma.irma = this.irma;
+            this.irma = -1;
+         }
+         else
+            throw new Exception("CREATE - Número de Chaves Incompatível");
+         return fa_irma;
+      }
+      
       /*
       toByteArray - transforma os dados da Folha em um arranho de bytes
       @return byte[]
@@ -364,7 +407,7 @@ class ArvoreBMais_Folha_Pagina{
          
             arq.seek(RAIZ);
             arq.writeLong(raiz);
-            resp = true;
+            sucesso = true;
          }
          
          else{
@@ -373,12 +416,77 @@ class ArvoreBMais_Folha_Pagina{
             
             //Se for Página
             if(tamanho == TAM_PAGINA){
+                  
+               //Preencher Página
+               Pagina pg = new Pagina();
+               byte[] data = new byte[TAM_PAGINA];
+               arq.read(data);
+               pg.fromByteArray(data);
 
+               //Verificar por onde descer
+               long filho = pg.ponteiros[0];
+               for(int i=0; i<pg.n_chaves && chave>pg.chaves[i]; i++){
+                  filho = pg.ponteiros[i+1];
+               }
+
+               //Ir até folha recusivamente
+         
             }
 
             //Se for Folha
             else if(tamanho == TAM_FOLHA){
+               
+               //Preencher Folha
+               Folha fa = new Folha();
+               byte[] data = new byte[TAM_FOLHA];
+               arq.read(data);
+               fa.fromByteArray(data);
 
+               //Inserir dados na Folha
+               Folha fa_irma = fa.inserir(chave, dado);
+fa.print();    
+               //Se foi necessário criar outra Folha
+               if(fa_irma != null){
+                  
+                  //Escrever irma no arquivo
+                  data = fa_irma.toByteArray();
+                  long end_irma = arq.length();
+                  arq.seek(end_irma);
+                  arq.writeInt(TAM_FOLHA);
+                  arq.write(data);
+
+                  //Atualizar folha original
+                  fa.irma = end_irma;
+                  data = fa.toByteArray();
+                  arq.seek(raiz);
+                  arq.writeInt(TAM_FOLHA);
+                  arq.write(data);
+
+                  //Criar Página para se tornar raiz   
+                  Pagina pg = new Pagina();
+                  pg.ponteiros[0] = raiz;
+                  pg.ponteiros[1] = end_irma;
+                  pg.chaves[0] = fa.chaves[fa.n_chaves-1];
+
+                  //Escrever Página no arquivo
+                  raiz = arq.length();
+                  arq.seek(raiz);
+                  data = pg.toByteArray();
+                  arq.writeInt(TAM_PAGINA);
+                  arq.write(data);
+
+                  //Escrever raiz em RAIZ
+                  arq.seek(RAIZ);
+                  arq.writeLong(raiz);
+               }
+               
+               //Não foi necessário criar outra folha
+               else{
+                  data = fa.toByteArray();
+                  arq.seek(raiz);
+                  arq.writeInt(TAM_FOLHA);
+                  arq.write(data);
+               }
             } 
             else{
                throw new Exception("CREATE - Tamnho Incompatível");     
@@ -394,8 +502,9 @@ class ArvoreBMais_Folha_Pagina{
    @param int chave, int dado, long pai, long atual
    @return int chave a ser inserida no retorno
    */
-   private  create(int chave, int dado, long pai, long atual){
-      arq.seek(atual)
+   private int create(int chave, int dado, long pai, long atual)throws Exception{
+      int nova_chave = -1;
+      arq.seek(atual);
       int tamanho = arq.readInt();
       
       //Se for Página
@@ -403,7 +512,7 @@ class ArvoreBMais_Folha_Pagina{
          
          //Preencher Pagina
          Pagina pg = new Pagina();
-         byte[] data = byte[TAM_PAGINA];
+         byte[] data = new byte[TAM_PAGINA];
          arq.read(data);
          pg.fromByteArray(data);
 
@@ -413,7 +522,7 @@ class ArvoreBMais_Folha_Pagina{
             filho = pg.ponteiros[i+1];
          }
 
-         sucesso = create(chave, dado, atual, filho);
+         nova_chave = create(chave, dado, atual, filho);
       }
       
       //Se for folha
@@ -423,13 +532,16 @@ class ArvoreBMais_Folha_Pagina{
       else{
          throw new Exception("CREATE - Tamnho Incompatível");
       }
-      return endereco;
+      return nova_chave;
    }
 
 //------ Main para Teste -----
    public static void main(String[] args)throws Exception{
       ArvoreBMais_Folha_Pagina arvore = new ArvoreBMais_Folha_Pagina("teste.db", 5);
       arvore.create(2, 2);
+      arvore.create(0, 2);
+      arvore.create(1, 10);
+      arvore.create(1, 11);
       int[] resp = arvore.read(1);
       if(resp.length > 0){
          for(int i=0; i<resp.length; i++){
