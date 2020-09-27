@@ -348,7 +348,9 @@ class ArvoreBMais_Folha_Pagina{
       boolean sucesso = false;
       if(!(chave<0) && !(dado<0)){
          arq.seek(RAIZ);
-         long raiz = arq.readLong();
+         long raiz = arq.readLong(); //endereço do nó atual
+         
+         //raiz vazia
          if(raiz == -1){
             Folha fa = new Folha();
             fa.n_chaves = 1;
@@ -362,9 +364,66 @@ class ArvoreBMais_Folha_Pagina{
          
             arq.seek(RAIZ);
             arq.writeLong(raiz);
+            resp = true;
+         }
+         
+         else{
+            arq.seek(raiz);
+            int tamanho = arq.readInt();
+            
+            //Se for Página
+            if(tamanho == TAM_PAGINA){
+
+            }
+
+            //Se for Folha
+            else if(tamanho == TAM_FOLHA){
+
+            } 
+            else{
+               throw new Exception("CREATE - Tamnho Incompatível");     
+            }
+            sucesso = true;
          }
       }
       return sucesso;
+   }
+
+   /*
+   Create - Overload
+   @param int chave, int dado, long pai, long atual
+   @return int chave a ser inserida no retorno
+   */
+   private  create(int chave, int dado, long pai, long atual){
+      arq.seek(atual)
+      int tamanho = arq.readInt();
+      
+      //Se for Página
+      if(tamanho == TAM_PAGINA){
+         
+         //Preencher Pagina
+         Pagina pg = new Pagina();
+         byte[] data = byte[TAM_PAGINA];
+         arq.read(data);
+         pg.fromByteArray(data);
+
+         //Verificar por onde descer
+         long filho = pg.ponteiros[0];
+         for(int i=0; i<pg.n_chaves && chave>pg.chaves[i]; i++){
+            filho = pg.ponteiros[i+1];
+         }
+
+         sucesso = create(chave, dado, atual, filho);
+      }
+      
+      //Se for folha
+      else if(tamanho == TAM_FOLHA){
+
+      }
+      else{
+         throw new Exception("CREATE - Tamnho Incompatível");
+      }
+      return endereco;
    }
 
 //------ Main para Teste -----
