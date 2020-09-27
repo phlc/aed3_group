@@ -288,13 +288,24 @@ class ArvoreBMais_Folha_Pagina{
    fillArrayList - preenche o ArryList com os dados da chave procurada
    @ArrayList lista, int indice, Folha fa
    */
-   private void fillArrayList(ArrayList lista, int indice, Folha fa){
+   private void fillArrayList(ArrayList lista, int indice, Folha fa)throws Exception{
       while(indice<fa.n_chave && chave==fa.chaves[indice]){
          lista.add(fa.dados[indice]);
+         indice++;
       }
       if(indice==MAX && fa.irma!=-1){
          arq.seek(fa.irma);
-         
+         int tamanho = arq.readInt();
+         if(tamanho == TAM_FOLHA){
+            Folha fa = new Folha();
+            byte[] data = new byte[TAM_FOLHA];
+            arq.read(data);
+            fa.fromByteArray(data);
+            fillArrayList(lista, 0, fa);
+         }
+         else{
+            throw new Exception("fillArrayList - Tamanho Irmã Incompatível");
+         } 
       }
    }
    
