@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Scanner;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -26,28 +27,59 @@ class Pergunta implements Registro{
    //atributos estaticos
    public static Date data;
    public static SimpleDateFormat formatter;
-   //public static ArvoreBMais_Int_Int indice;
+   public static ArvoreBMais_Int_Int indice;
+   public static CRUD<Pergunta> arquivo;
+   public static int[] listaPerguntas;
+
 
    //metodos estaticos
+
+   /*Método para carregar perguntas de novo usuário logado
+    * @param - int idUsuario
+    */
+   public static void carregarPerguntas(int idUsuario)throws Exception{
+      listaPerguntas = indice.read(idUsuario);
+   }
+
    //obter listagem de perguntas feitas por um usuário
-   /*public static ArrayList<String> getList(int idUsuario) throws Exception{
-      ArrayList<String> lista = new ArrayList<String>();
-      int c = 1;
-      int[] dados = indice.read(idUsuario);
-      for(int i = 0; i < dados.length; i++){
-         Pergunta p = arquivo.read(dados[i]);
-         String item = "" + c + ".\n" + formatter.format(new Date(p.criacao)) + "\n" + p.pergunta;
-         lista.add(item);
-         c++;
+   public static void printPerguntas(int idUsuario) throws Exception{
+      carregarPerguntas(idUsuario);
+      for(int i = 0; i < listaPerguntas.length; i++){
+         Pergunta p = arquivo.read(listaPerguntas[i]);
+
+         System.out.println("\n" + (i+1) + ".\n" + formatter.format(new Date(p.criacao)) + "\n" + p.pergunta);
       }
-      return lista;
-   }*/
+   }
 
    //criar pergunta no indice quando criar no arquivo principal
-   /*public static void createAtIndex(int userId, Pergunta p) throws IOException{
+   public static void createAtIndex(int userId, Pergunta p) throws IOException{
       indice.create(userId, p.idPergunta);
-   }*/
+   }
+   /*
+    * novaPergunta - Método para usuário criar adicionar uma nova pergunta 
+    * em sua conta
+    */
+   public static void novaPergunta(Scanner leitor, int idUsuario) throws Exception{
+      System.out.println("\nInsira a pergunta:");
+      String buffer = leitor.nextLine();
 
+      if(!buffer.equals("")){
+         System.out.println("\nCONFIRME A CRIAÇÃO DA PERGUNTA: ");
+         System.out.println("\""+buffer+"\"");
+         System.out.print("(SIM(S) NÃO(N)): ");
+         String confirmacao = leitor.nextLine();
+         confirmacao = confirmacao.toUpperCase();
+ 
+         if(confirmacao.contains("S")){
+            Pergunta nova = new Pergunta(idUsuario, buffer);
+            arquivo.create(nova);            
+            indice.create(idUsuario, nova.getID());
+         }else{
+            System.out.println("Inclusão de pergunta cancelada");
+         }
+
+      }
+   }
    //atributos
    public int idUsuario; //chave de busca
    private int idPergunta; //dado
@@ -62,7 +94,7 @@ class Pergunta implements Registro{
    }
 
    public Pergunta(int _idUsuario, String _pergunta){
-      this(-1, _idUsuario, System.currentTimeMillis(), Short.MIN_VALUE, _pergunta, true);
+      this(-1, _idUsuario, System.currentTimeMillis(), (short)0, _pergunta, true);
    }
 
    public Pergunta(int _idPergunta, int _idUsuario, long _criacao, short _nota, String _pergunta, boolean _ativa){
@@ -105,10 +137,8 @@ class Pergunta implements Registro{
       dos.writeShort(this.nota);
       dos.writeUTF(this.pergunta);
       dos.writeBoolean(this.ativa);
-
       return(baos.toByteArray());
    }
-
       
    /*
    fromByteArray - preenche o objeto a partir de um byte[]
@@ -117,7 +147,7 @@ class Pergunta implements Registro{
    public void fromByteArray(byte[] ba) throws IOException{
       ByteArrayInputStream bais = new ByteArrayInputStream(ba);
       DataInputStream dis = new DataInputStream(bais);
-
+   
       this.idUsuario = dis.readInt();
       this.idPergunta = dis.readInt();
       this.criacao = dis.readLong();
@@ -147,7 +177,7 @@ class Pergunta implements Registro{
    No caso das perguntas, retorna null
    */
    public String chaveSecundaria(){
-      return null;
+      return Integer.toString(this.idPergunta);
    }
 
 }

@@ -16,11 +16,6 @@ import java.text.SimpleDateFormat;
 import aed3.ArvoreBMais_Int_Int;
 import java.util.Scanner;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import aed3.ArvoreBMais_Int_Int;
-import java.util.ArrayList;
-
 public class Menu{
 
    private static String _NOME = "PERGUNTAS";
@@ -48,20 +43,17 @@ public class Menu{
    private static int notificacoes; //seria isso um dado do usuário armazenado no arquivo? Se sim, criar novo campo no BD
    private static Scanner leitor = new Scanner(System.in);
    private static byte estado;
-   public static CRUD<Pergunta> arquivoPerg;
-   public static ArvoreBMais_Int_Int indicePerg;
-   private static ArrayList<String> perguntasOnline;
-
+   
    //inicializa atributos estáticos das classes Acesso e Pergunta
    private static void inicializar() throws Exception{
       Acesso.arquivo = new CRUD<Usuario>(Usuario.class.getConstructor(), "usuarios.db");
-      arquivoPerg = new CRUD<Pergunta>(Pergunta.class.getConstructor(), "perguntas.db");
-      indicePerg = new ArvoreBMais_Int_Int(5, "indicePerguntas.db");
+      Pergunta.arquivo = new CRUD<Pergunta>(Pergunta.class.getConstructor(), "perguntas.db");
       Pergunta.data = new Date();
-      //Pergunta.indice = new ArvoreBMais_Int_Int(5, "indicePerguntas.db");
+      Pergunta.indice = new ArvoreBMais_Int_Int(5, "indicePerguntas.db");
       Pergunta.formatter = new SimpleDateFormat();
       estado = 1;
    }
+
 
    //funcoes da interface
    public static String getNome(){
@@ -71,9 +63,11 @@ public class Menu{
   public static String getVersao(){
       return _VERSAO;
   }
+
    /*
    pause - realiza uma pausa até o novo input
    */
+
   public static void pause(Scanner leitor){
       System.out.println();
       System.out.println("Aperte ENTER para Continuar");
@@ -94,6 +88,10 @@ public class Menu{
     */
    public static int lerEscolha(){
       int escolha = 0; 
+
+      //if (leitor.hasNextLine())//limpar buffer
+        //    leitor.nextLine();
+
       String buffer = leitor.nextLine();;
       try{
             escolha = Integer.parseInt(buffer);
@@ -149,6 +147,13 @@ public class Menu{
             pause(leitor);
       }
    }
+   /*
+    * login - recebe o retorno da função acessoSistema da classe Acesso (que é um objeto Usuario, se o login for bem sucedido. Caso contrário, null)
+    */
+   public static void login() throws Exception{
+      online = Acesso.acessoSistema(leitor);
+      Pergunta.carregarPerguntas(online.getID());
+   }
 
    /*
     *  telaErro - Apresenta a tela de erro
@@ -187,10 +192,10 @@ public class Menu{
       switch(escolha){
          case 0:
             estado = 1;
-            perguntasOnline = getPerguntas();
             break;
          case 1:
             try{
+               estado = 3;
                menuGerencPerg();
             }
             catch (Exception e){
@@ -232,7 +237,16 @@ public class Menu{
             break;
          case 1:
             try{
-               novaPergunta();
+               Pergunta.printPerguntas(online.getID());
+               pause(leitor);
+            }
+            catch (Exception e){
+               pause(leitor);
+            }
+            break;
+         case 2:
+            try{
+               Pergunta.novaPergunta(leitor, online.getID());
             }
             catch (Exception e){
                telaErro();
@@ -243,66 +257,6 @@ public class Menu{
             pause(leitor);
       }
    }
-
-   /*
-    * novaPergunta - Método para usuário criar adicionar uma nova pergunta 
-    * em sua conta
-    */
-   public static void novaPergunta() throws Exception{
-      System.out.println(header);
-      System.out.println("PERGUNTAS > GERENCIAR PERGUNTAS > NOVA PERGUNTA\n");
-
-      System.out.println("\nInsira a pergunta:");
-      String buffer = leitor.nextLine();
-
-      if(!buffer.equals("")){
-         System.out.println("\nCONFIRME A CRIAÇÃO DA PERGUNTA: ");
-         System.out.println("\""+buffer+"\"");
-         System.out.print("(SIM(S) NÃO(N)): ");
-         String confirmacao = leitor.nextLine();
-         confirmacao = confirmacao.toUpperCase();
- 
-         if(confirmacao.contains("S")){
-            Pergunta nova = new Pergunta(online.getID(), buffer);
-            arquivoPerg.create(nova);
-            indicePerg.create(online.getID(), nova.getID());
-         }
-
-      }
-      pause(leitor);
-   }
-
-   /*
-    * telaMinhasPerguntas - Apresenta a tela que exibe as perguntas do usuario
-    * @param ArrayList perguntasUsuario
-    */
-   public static void telaMinhasPerguntas(ArrayList perguntasUsuario) throws Exception{
-      System.out.println(perguntasUsuario);
-   }
-
-   /*
-    * getPerguntas - Retorna perguntas de usuario armazenados na arvore B+
-    */
-   public static ArrayList<String> getPerguntas() throws Exception{
-      ArrayList<String> lista = new ArrayList<String>();
-      int c = 1;
-      int[] dados = indicePerg.read(online.getID());
-      for(int i = 0; i < dados.length; i++){
-         Pergunta p = arquivoPerg.read(dados[i]);
-         String item = "" + c + ".\n" + Pergunta.formatter.format(new Date(p.criacao)) + "\n" + p.pergunta;
-         lista.add(item);
-         c++;
-      }
-      return lista;
-   }
-
-   /*
-    * login - recebe o retorno da função acessoSistema da classe Acesso (que é um objeto Usuario, se o login for bem sucedido. Caso contrário, null)
-   */
-   public static void login() throws Exception{
-      online = Acesso.acessoSistema(leitor);
-   }
-
 
    /*
     * main - funcao principal de interação com o usuário
@@ -319,6 +273,9 @@ public class Menu{
                   break;
                case 2:
                   menuPerguntas();
+                  break;
+               case 3:
+                  menuGerencPerg();
                   break;
                default:
                   telaErro();
