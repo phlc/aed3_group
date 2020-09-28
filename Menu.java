@@ -237,7 +237,7 @@ public class Menu{
             break;
          case 1:
             try{
-               Pergunta.printPerguntas(online.getID());
+               Pergunta.printPerguntas(online.getID(), true);
                pause(leitor);
             }
             catch (Exception e){
@@ -247,6 +247,22 @@ public class Menu{
          case 2:
             try{
                Pergunta.novaPergunta(leitor, online.getID());
+            }
+            catch (Exception e){
+               telaErro();
+            }
+            break;
+         case 3:
+            try{
+               Pergunta.alterarPergunta(leitor, online.getID());
+            }
+            catch (Exception e){
+               telaErro();
+            }
+            break;
+         case 4:
+            try{
+               Pergunta.arquivarPergunta(leitor, online.getID());
             }
             catch (Exception e){
                telaErro();

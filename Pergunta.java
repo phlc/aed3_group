@@ -41,13 +41,19 @@ class Pergunta implements Registro{
       listaPerguntas = indice.read(idUsuario);
    }
 
-   //obter listagem de perguntas feitas por um usuário
-   public static void printPerguntas(int idUsuario) throws Exception{
+   /* Obter print de listagem de perguntas feitas por um usuário, boolean para definir se 
+    * perguntas arquivadas serão consideradas na hora do print
+    * @param int idUsuario, boolean printArq
+    */
+   public static void printPerguntas(int idUsuario, boolean printArq) throws Exception{
       carregarPerguntas(idUsuario);
       for(int i = 0; i < listaPerguntas.length; i++){
          Pergunta p = arquivo.read(listaPerguntas[i]);
-
-         System.out.println("\n" + (i+1) + ".\n" + formatter.format(new Date(p.criacao)) + "\n" + p.pergunta);
+         if(p.ativa)
+            System.out.println("\n" + (i+1) + ".\n" + formatter.format(new Date(p.criacao)) + "\n" + p.pergunta);
+         else if(printArq)
+            System.out.println("\n" + (i+1) + ". (Arquivada)\n" + formatter.format(new Date(p.criacao)) 
+            + "\n" + p.pergunta);
       }
    }
 
@@ -56,8 +62,8 @@ class Pergunta implements Registro{
       indice.create(userId, p.idPergunta);
    }
    /*
-    * novaPergunta - Método para usuário criar adicionar uma nova pergunta 
-    * em sua conta
+    * novaPergunta - Método para usuário adicionar uma nova pergunta 
+    * @param Scanner leitor, int idUsuario
     */
    public static void novaPergunta(Scanner leitor, int idUsuario) throws Exception{
       System.out.println("\nInsira a pergunta:");
@@ -74,12 +80,101 @@ class Pergunta implements Registro{
             Pergunta nova = new Pergunta(idUsuario, buffer);
             arquivo.create(nova);            
             indice.create(idUsuario, nova.getID());
+            System.out.println("Pergunta incluída com sucesso!");
          }else{
-            System.out.println("Inclusão de pergunta cancelada");
+            System.out.println("Inclusão de pergunta cancelada.");
          }
 
       }
    }
+
+   /*
+    * alterarPergunta - Método para usuário alterar uma pergunta 
+    * @param Scanner leitor, int idUsuario
+    */
+   public static void alterarPergunta(Scanner leitor, int idUsuario) throws Exception{
+      carregarPerguntas(idUsuario);
+      printPerguntas(idUsuario, false);
+
+      System.out.println("\nQual pergunta dejesa alterar: ");
+      int escolha = Menu.lerEscolha();
+
+      if(0 < escolha && escolha <= listaPerguntas.length){
+
+         Pergunta p = arquivo.read(listaPerguntas[escolha-1]);
+
+         if(p.ativa){
+            System.out.println("Pergunta escolhida: "+p.pergunta);
+            System.out.println("\nInsira a alteração da pergunta:");
+            String buffer = leitor.nextLine();
+            
+            if(!buffer.equals("")){
+               System.out.println("\nCONFIRME A ALTERAÇÃO DA PERGUNTA: ");
+               System.out.println("\""+buffer+"\"");
+               System.out.print("(SIM(S) NÃO(N)): ");
+               String confirmacao = leitor.nextLine();
+               confirmacao = confirmacao.toUpperCase();
+      
+               if(confirmacao.contains("S")){
+                  System.out.println("Pergunta alterada com sucesso!");
+                  p.pergunta = buffer;
+                  arquivo.update(p);            
+               }else{
+                  System.out.println("Alteração de pergunta cancelada.");
+               }
+
+            }
+         }else{
+            System.out.println("\nPergunta escolhida arquivada, tente outra.");
+         }
+      }else{
+         System.out.println("\nPergunta escolhida não existe, tente outra.");
+      }
+
+      Menu.pause(leitor);
+   }
+
+   /*
+    * arquivarPergunta - Método para usuário arquivar uma pergunta 
+    * @param Scanner leitor, int idUsuario
+    */
+   public static void arquivarPergunta(Scanner leitor, int idUsuario) throws Exception{
+      carregarPerguntas(idUsuario);
+      printPerguntas(idUsuario, false);
+
+      System.out.println("\nQual pergunta dejesa alterar: ");
+      int escolha = Menu.lerEscolha();
+
+      if(0 < escolha && escolha <= listaPerguntas.length){
+
+         Pergunta p = arquivo.read(listaPerguntas[escolha-1]);
+
+         if(p.ativa){
+            System.out.println("Pergunta escolhida: "+p.pergunta);
+             
+            
+            System.out.println("\nCONFIRME O ARQUIVAMENTO DA PERGUNTA: ");
+            System.out.print("(SIM(S) NÃO(N)): ");
+            String confirmacao = leitor.nextLine();
+            confirmacao = confirmacao.toUpperCase();
+      
+            if(confirmacao.contains("S")){
+               System.out.println("Pergunta alterada com sucesso!");
+               p.ativa = false;
+               arquivo.update(p);            
+            }else{
+               System.out.println("Alteração de pergunta cancelada.");
+            }
+         }else{
+            System.out.println("\nPergunta escolhida arquivada, tente outra.");
+         }
+      }else{
+         System.out.println("\nPergunta escolhida não existe, tente outra.");
+      }
+
+      Menu.pause(leitor);
+   }
+
    //atributos
    public int idUsuario; //chave de busca
    private int idPergunta; //dado
