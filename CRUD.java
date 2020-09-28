@@ -76,7 +76,7 @@ class CRUD <T extends Registro>{
    @param T objeto
    @return int id
    */
-   public int create(T objeto) throws Exception{      
+   public int create(T objeto) throws Exception{     
       //ler proximo id
       arq.seek(NEXT_ID);
       final int nextId = arq.readInt();
@@ -92,7 +92,7 @@ class CRUD <T extends Registro>{
       //escrever proximo ID
       arq.seek(NEXT_ID);
       arq.writeInt(nextId + 1);
-
+      
       //verificar se há registro apagado disponível
       long pos = apagados.read(tam);
       
