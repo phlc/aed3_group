@@ -92,6 +92,8 @@ class ArvoreBMais_Folha_Pagina{
       */
       private Folha inserir(int chave, int dado)throws Exception{
          Folha fa_irma = null;
+         
+         //Nao precisa duplicar
          if(this.n_chaves < MAX){
             int i;
             for(i=this.n_chaves-1; i>=0; i--){
@@ -108,6 +110,8 @@ class ArvoreBMais_Folha_Pagina{
             this.n_chaves++;
 
          }
+         
+         //Precisa duplicar
          else if(this.n_chaves == MAX){
             fa_irma = new Folha();
             int i = this.n_chaves -1;
@@ -123,6 +127,17 @@ class ArvoreBMais_Folha_Pagina{
             }
             fa_irma.irma = this.irma;
             this.irma = -1;
+            
+            //Após duplicar, inserir nova chave
+            int ultimo = this.n_chaves-1;
+            if(this.chaves[ultimo]>chave || 
+               (this.chaves[ultimo]==chave && this.dados[ultimo]>dado)){
+               this.inserir(chave, dado);
+            } 
+            else{
+               fa_irma.inserir(chave, dado);
+            }
+            
          }
          else
             throw new Exception("CREATE - Número de Chaves Incompatível");
@@ -365,7 +380,7 @@ class ArvoreBMais_Folha_Pagina{
          lista.add(fa.dados[indice]);
          indice++;
       }
-      if(indice==MAX && fa.irma!=-1){
+      if(indice==fa.n_chaves && fa.irma!=-1){
          arq.seek(fa.irma);
          int tamanho = arq.readInt();
          if(tamanho == TAM_FOLHA){
@@ -465,6 +480,7 @@ class ArvoreBMais_Folha_Pagina{
 
                   //Criar Página para se tornar raiz   
                   Pagina pg = new Pagina();
+                  pg.n_chaves = 1;
                   pg.ponteiros[0] = raiz;
                   pg.ponteiros[1] = end_irma;
                   pg.chaves[0] = fa.chaves[fa.n_chaves-1];
