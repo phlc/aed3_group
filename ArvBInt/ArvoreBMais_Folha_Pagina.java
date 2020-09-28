@@ -43,6 +43,14 @@ Objetos:
 - Página
    Número de Chaves
    Ponteiro|Chave|Ponteiro
+
+Funcionamento:
+   Elementos armazenados em ordem crescente onde o primerio elemento de determinada
+   chave é o último elemento do filho da esquerada do índice.
+   ex:
+            1 - 5 - 7
+              /
+            2 - 5
 */
 
 class ArvoreBMais_Folha_Pagina{
@@ -214,7 +222,10 @@ class ArvoreBMais_Folha_Pagina{
          }
          System.out.println(" p: "+this.ponteiros[MAX]+" )");
       }
-   
+      
+      /*
+      inserir -    
+
       /*
       toByteArray - transforma os dados da Pagina em um arranho de bytes
       @return byte[]
@@ -495,9 +506,6 @@ class ArvoreBMais_Folha_Pagina{
                   //Escrever raiz em RAIZ
                   arq.seek(RAIZ);
                   arq.writeLong(raiz);
-fa.print();
-fa_irma.print();
-pg.print();
                }
                
                //Não foi necessário criar outra folha
