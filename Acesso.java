@@ -1,9 +1,4 @@
 /*
-
-----------------------------------------------------
-EM PROCESSO DE MODIFICAÇÃO PARA A PARTE 4 DO PROJETO
-----------------------------------------------------
-
 Ciencia da Computacao - Pucminas
 AED3 - manha
 Larissa Domingues Gomes
@@ -24,43 +19,6 @@ public class Acesso{
 
    public static CRUD<Usuario> arquivo;
 
-   /*
-   telaInicial - Apresenta a tela inicial -- nao utilizada
-
-   public static void telaInicial(){
-      System.out.println();
-      System.out.println(_NOME+" "+_VERSAO);
-      System.out.println("==================");
-      System.out.println();
-      System.out.println("ACESSO");
-      System.out.println();
-      System.out.println("1) Acesso ao sistema");
-      System.out.println("2) Novo Usuário (primeiro acesso)");
-      System.out.println("3) Esqueci minha senha");
-      System.out.println();
-      System.out.println("0) Sair");
-      System.out.println();
-      System.out.print("Opção: ");
-   }  
-   */
-
-   /*
-   telaErro - Apresenta tela de erro -- nao utilizada
-   @Scanner leitor
-   
-   public static void telaErro(Scanner leitor){
-      clear();
-      System.out.println();
-      System.out.println(_NOME+" "+_VERSAO);
-      System.out.println("==================");
-      System.out.println();
-      System.out.println("DESCULPE, OCORREU UM ERRO INESPERADO");
-      System.out.println();
-      System.out.println("TENTE NOVAMENTE MAIS TARDE");
-      System.out.println();
-      pause(leitor);
-   }
-   */
    /*
    telaFinal - Apresenta tela final -- nao utilizada
    @Scanner leitor
