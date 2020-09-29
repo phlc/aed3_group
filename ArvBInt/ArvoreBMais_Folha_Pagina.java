@@ -37,19 +37,19 @@ Objetos:
 
 - Folha
    Número de Chaves
-   Chaves|Dados
+   [Chave|Dado]
    Ponteiro Irmã
 
 - Página
    Número de Chaves
-   Ponteiro|Chave|Ponteiro
+   [Ponteiro|Chave|Dado|Ponteiro]
 
 Funcionamento:
-   Elementos armazenados em ordem crescente onde o primerio elemento de determinada
-   chave é o último elemento do filho da esquerada do índice.
+   Elementos armazenados em ordem crescente onde a chave de determinada Página
+   é o último elemento do filho da esquerada do índice.
    ex:
             1 - 5 - 7
-              /
+               /
             2 - 5
 */
 
@@ -197,16 +197,19 @@ class ArvoreBMais_Folha_Pagina{
       protected int n_chaves;
       protected long[] ponteiros;
       protected int[] chaves;
+      protected int[] dados;
 
       //Construtor
       public Pagina(){
          this.n_chaves = 0;
          this.ponteiros = new long[ORDEM];
          this.chaves = new int[MAX];
+         this.dados = new int[MAX];
 
          for (int i=0; i<MAX; i++){
             this.ponteiros[i] = -1;
             this.chaves[i] = -1;
+            this.dados[i] = -1;
          }
          this.ponteiros[MAX] = -1;
       }
@@ -218,7 +221,8 @@ class ArvoreBMais_Folha_Pagina{
       protected void print(){
          System.out.print("Página(n_chaves: "+this.n_chaves+" |");
          for (int i=0; i<MAX; i++){
-            System.out.print(" p: "+this.ponteiros[i]+" ch: "+this.chaves[i]+" |");
+            System.out.print(" p: "+this.ponteiros[i]+" ch: "+this.chaves[i]+" da: "
+                              +this.dados+" |");
          }
          System.out.println(" p: "+this.ponteiros[MAX]+" )");
       }
@@ -238,6 +242,7 @@ class ArvoreBMais_Folha_Pagina{
          for(int i=0; i<MAX; i++){
             da.writeLong(this.ponteiros[i]);
             da.writeInt(this.chaves[i]);
+            da.writeInt(this.dados[i]);
          }
          da.writeLong(this.ponteiros[MAX]);
          
@@ -256,6 +261,7 @@ class ArvoreBMais_Folha_Pagina{
          for(int i=0; i<MAX; i++){
             this.ponteiros[i] = da.readLong();
             this.chaves[i] = da.readInt();
+            this.dados[i] = da.readInt();
          }
          this.ponteiros[MAX] = da.readLong();
       }
@@ -263,6 +269,7 @@ class ArvoreBMais_Folha_Pagina{
 //--------- Árvore ------------
    //Constantes Estáticas
    private static long RAIZ = 4;
+   private static String DIRETORIO = "dbs";
 
    //Atributos
    private RandomAccessFile arq;
@@ -273,11 +280,18 @@ class ArvoreBMais_Folha_Pagina{
 
    //Construtor
    public ArvoreBMais_Folha_Pagina(String nome, int ordem)throws Exception{
-      arq = new RandomAccessFile(nome, "rws");
+      if(ordem < 4)
+         throw new Exception("Ordem Mínima 4");
+
+      File diretorio = new File(DIRETORIO);
+      if(! diretorio.exists())
+         diretorio.mkdir();
+
+      arq = new RandomAccessFile(DIRETORIO+"/"+nome, "rws");
       this.ORDEM = ordem;
       this.MAX = ORDEM -1;
       this.TAM_FOLHA = 4 + MAX*4 + MAX*4 + 8;
-      this.TAM_PAGINA = 4 + ORDEM*8 + MAX*4;     
+      this.TAM_PAGINA = 4 + ORDEM*8 + MAX*4 + MAX*4;     
 
       if (arq.length() < 12){
          arq.seek(0);
@@ -291,18 +305,9 @@ class ArvoreBMais_Folha_Pagina{
       }
    }
 
+   //Ordem padrão 5
    public ArvoreBMais_Folha_Pagina(String nome) throws Exception{
-      arq = new RandomAccessFile(nome, "rws");
-      if (arq.length() < 12)
-         throw new Exception("Ordem Necessária para Criar Novo Arquivo");
-      else{
-         arq.seek(0);
-         int ordem = arq.readInt();
-         this.ORDEM = ordem;
-         this.MAX = ORDEM -1;;
-         this.TAM_FOLHA = 4 + MAX*4 + MAX*4 + 8;
-         this.TAM_PAGINA = 4 + ORDEM*8 + MAX*4;     
-      }
+     this(nome, 5); 
    }
 
    //Metodos
@@ -568,12 +573,12 @@ class ArvoreBMais_Folha_Pagina{
 //------ Main para Teste -----
    public static void main(String[] args)throws Exception{
       ArvoreBMais_Folha_Pagina arvore = new ArvoreBMais_Folha_Pagina("teste.db", 5);
-      arvore.create(2, 2);
-      arvore.create(0, 2);
-      arvore.create(1, 10);
-      arvore.create(1, 12);
+      arvore.create(2, 21);
+      arvore.create(0, 01);
       arvore.create(1, 11);
-      int[] resp = arvore.read(1);
+      arvore.create(1, 12);
+      arvore.create(1, 13);
+      int[] resp = arvore.read(0);
       if(resp.length > 0){
          for(int i=0; i<resp.length; i++){
             System.out.println(resp[i]);
