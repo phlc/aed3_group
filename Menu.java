@@ -13,8 +13,9 @@ Tarcila Fernanda Resende da Silva
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import aed3.ArvoreBMais_Int_Int;
+import aed3.*;
 import java.util.Scanner;
+
 
 public class Menu{
 
@@ -51,6 +52,7 @@ public class Menu{
       Pergunta.data = new Date();
       Pergunta.indice = new ArvoreBMais_Int_Int(5, "indicePerguntas.db");
       Pergunta.formatter = new SimpleDateFormat();
+      Pergunta.listaChaves = new ListaInvertida(20, "palavrasChave.db", "palavrasBlocos.db");
       estado = 1;
    }
 
@@ -152,7 +154,6 @@ public class Menu{
     */
    public static void login() throws Exception{
       online = Acesso.acessoSistema(leitor);
-      Pergunta.carregarPerguntas(online.getID());
    }
 
    /*
@@ -282,6 +283,7 @@ public class Menu{
       String buffer;
       try{
          inicializar();
+
          do{
             switch(estado){
                case 1:
