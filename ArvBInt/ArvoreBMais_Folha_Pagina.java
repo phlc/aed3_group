@@ -225,10 +225,7 @@ class ArvoreBMais_Folha_Pagina{
                               +this.dados+" |");
          }
          System.out.println(" p: "+this.ponteiros[MAX]+" )");
-      }
-      
-      /*
-      inserir -    
+      } 
 
       /*
       toByteArray - transforma os dados da Pagina em um arranho de bytes
@@ -443,131 +440,148 @@ class ArvoreBMais_Folha_Pagina{
          }
          
          else{
-            arq.seek(raiz);
-            int tamanho = arq.readInt();
+            //Vai até a folha recursivamente
+            //Adiciona chave e dado.
+            //Se necessário, retorna o endereço no arquivo da nova Página/Folha 
+            long duplicada = create(chave, dado, raiz);
+             
+            //se houve criação de Folha/Página
+            if (duplicada != -1){
+               int nova_chave;
+               int novo_dado;
+
+               //Carregar Folha/Página antiga
+               arq.seek(RAIZ);
+               long raiz_antiga = arq.readLong();
+               arq.seek(raiz_antiga);
+               int tamanho = arq.readInt();
             
-            //Se for Página
-            if(tamanho == TAM_PAGINA){
+               //Se for Página
+               if(tamanho == TAM_PAGINA){
                   
-               //Preencher Página
-               Pagina pg = new Pagina();
-               byte[] data = new byte[TAM_PAGINA];
-               arq.read(data);
-               pg.fromByteArray(data);
-
-               //Verificar por onde descer
-               long filho = pg.ponteiros[0];
-               for(int i=0; i<pg.n_chaves && chave>pg.chaves[i]; i++){
-                  filho = pg.ponteiros[i+1];
-               }
-
-               //Ir até folha recusivamente
-         
-            }
-
-            //Se for Folha
-            else if(tamanho == TAM_FOLHA){
+                  //Preencher Página com a Raiz Antiga
+                  Pagina pg_raiz_ant = new Pagina();
+                  byte[] data = new byte[TAM_PAGINA];
+                  arq.read(data);
+                  pg_raiz_ant.fromByteArray(data);
                
-               //Preencher Folha
-               Folha fa = new Folha();
-               byte[] data = new byte[TAM_FOLHA];
-               arq.read(data);
-               fa.fromByteArray(data);
-
-               //Inserir dados na Folha
-               Folha fa_irma = fa.inserir(chave, dado);
-
-               //Se foi necessário criar outra Folha
-               if(fa_irma != null){
-
-                  //Escrever irma no arquivo
-                  data = fa_irma.toByteArray();
-                  long end_irma = arq.length();
-                  arq.seek(end_irma);
-                  arq.writeInt(TAM_FOLHA);
-                  arq.write(data);
-
-                  //Atualizar folha original
-                  fa.irma = end_irma;
-                  data = fa.toByteArray();
-                  arq.seek(raiz);
-                  arq.writeInt(TAM_FOLHA);
-                  arq.write(data);
-
-                  //Criar Página para se tornar raiz   
-                  Pagina pg = new Pagina();
-                  pg.n_chaves = 1;
-                  pg.ponteiros[0] = raiz;
-                  pg.ponteiros[1] = end_irma;
-                  pg.chaves[0] = fa.chaves[fa.n_chaves-1];
-
-                  //Escrever Página no arquivo
-                  raiz = arq.length();
-                  arq.seek(raiz);
-                  data = pg.toByteArray();
-                  arq.writeInt(TAM_PAGINA);
-                  arq.write(data);
-
-                  //Escrever raiz em RAIZ
-                  arq.seek(RAIZ);
-                  arq.writeLong(raiz);
+                  //estabelecer chave|dado da nova raiz
+                  nova_chave = pg_raiz_ant.chaves[pg_raiz_ant.n_chaves-1];
+                  novo_dado = pg_raiz_ant.dados[pg_raiz_ant.n_chaves-1];
                }
                
-               //Não foi necessário criar outra folha
+               else if(tamanho == TAM_FOLHA){
+               
+                  //Preencher Folha com a Raiz Antiga
+                  Folha fa_raiz_ant = new Folha();
+                  byte[] data = new byte[TAM_FOLHA];
+                  arq.read(data);
+                  fa_raiz_ant.fromByteArray(data);
+  
+                  //estabelecer chava|dado da nova raiz
+                  nova_chave = fa_raiz_ant.chaves[fa_raiz_ant.n_chaves-1];
+                  novo_dado = fa_raiz_ant.dados[fa_raiz_ant.n_chaves-1];
+               }
                else{
-                  data = fa.toByteArray();
-                  arq.seek(raiz);
-                  arq.writeInt(TAM_FOLHA);
-                  arq.write(data);
+                  throw new Exception("CREATE - Tamnho Incompatível");     
                }
-            } 
-            else{
-               throw new Exception("CREATE - Tamnho Incompatível");     
-            }
                
-      
-            sucesso = true;
-         }
+               //criar nova Página raiz
+               Pagina pg_raiz_nova = new Pagina();
+               pg_raiz_nova.n_chaves = 1;
+               pg_raiz_nova.ponteiros[0] = raiz_antiga;
+               pg_raiz_nova.chaves[0] = nova_chave;
+               pg_raiz_nova.dados[0] = novo_dado;
+               pg_raiz_nova.ponteiros[1] = duplicada;
+         
+               //Escrever Página no arquivo
+               raiz = arq.length();
+               arq.seek(raiz);
+               byte[] data = new byte[TAM_PAGINA];
+               data = pg_raiz_nova.toByteArray();
+               arq.writeInt(TAM_PAGINA);
+               arq.write(data);
+
+               //Escrever raiz em RAIZ
+               arq.seek(RAIZ);
+               arq.writeLong(raiz);
+            }       
+         } 
+         sucesso = true;
       }
       return sucesso;
    }
 
    /*
    Create - Overload
-   @param int chave, int dado, long pai, long atual
-   @return int chave a ser inserida no retorno
+   @param int chave, int dado, long endereço
+   @return long endereco da nova Página / Folha
    */
-   private int create(int chave, int dado, long pai, long atual)throws Exception{
-      int nova_chave = -1;
-      arq.seek(atual);
+   private long create(int chave, int dado, long endereco)throws Exception{
+      long novo_endereco = -1;
+      arq.seek(endereco);
       int tamanho = arq.readInt();
-      
+            
       //Se for Página
       if(tamanho == TAM_PAGINA){
-         
-         //Preencher Pagina
+                  
+         //Preencher Página
          Pagina pg = new Pagina();
          byte[] data = new byte[TAM_PAGINA];
          arq.read(data);
          pg.fromByteArray(data);
 
          //Verificar por onde descer
-         long filho = pg.ponteiros[0];
-         for(int i=0; i<pg.n_chaves && chave>pg.chaves[i]; i++){
-            filho = pg.ponteiros[i+1];
+         long descida = pg.ponteiros[0];
+         for(int i=0; i<pg.n_chaves && (chave>pg.chaves[i] || 
+              (chave==pg.chaves[i] && dado>pg.dados[i])); i++){
+            descida = pg.ponteiros[i+1];
          }
 
-         nova_chave = create(chave, dado, atual, filho);
-      }
-      
-      //Se for folha
-      else if(tamanho == TAM_FOLHA){
+         //Ir até folha recusivamente
+         long duplicada = create(chave, dado, descida);
 
+         //Se houve criação de Folha/Pagina
+/*
+
+PENDENTE
+
+*/         
+      }
+
+      //Se for Folha
+      else if(tamanho == TAM_FOLHA){    
+         //Preencher Folha
+         Folha fa = new Folha();
+         byte[] data = new byte[TAM_FOLHA];
+         arq.read(data);
+         fa.fromByteArray(data);
+
+         //Inserir dados na Folha
+         Folha fa_irma = fa.inserir(chave, dado);
+
+         //Se foi necessário criar outra Folha
+         if(fa_irma != null){
+
+            //Escrever irma no arquivo
+            data = fa_irma.toByteArray();
+            novo_endereco = arq.length();
+            arq.seek(novo_endereco);
+            arq.writeInt(TAM_FOLHA);
+            arq.write(data);
+
+            //Atualizar folha original
+            fa.irma = novo_endereco;
+            data = fa.toByteArray();
+            arq.seek(endereco);
+            arq.writeInt(TAM_FOLHA);
+            arq.write(data); 
+         } 
       }
       else{
-         throw new Exception("CREATE - Tamnho Incompatível");
-      }
-      return nova_chave;
+         throw new Exception("CREATE - Tamnho Incompatível");     
+      } 
+      return novo_endereco;
    }
 
 //------ Main para Teste -----
@@ -578,7 +592,7 @@ class ArvoreBMais_Folha_Pagina{
       arvore.create(1, 11);
       arvore.create(1, 12);
       arvore.create(1, 13);
-      int[] resp = arvore.read(0);
+      int[] resp = arvore.read(1);
       if(resp.length > 0){
          for(int i=0; i<resp.length; i++){
             System.out.println(resp[i]);
