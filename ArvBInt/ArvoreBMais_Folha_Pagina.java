@@ -518,7 +518,7 @@ class ArvoreBMais_Folha_Pagina{
    @return long endereco da nova Página / Folha
    */
    private long create(int chave, int dado, long endereco)throws Exception{
-      long novo_endereco = -1;
+      long duplicada = -1;
       arq.seek(endereco);
       int tamanho = arq.readInt();
             
@@ -539,7 +539,7 @@ class ArvoreBMais_Folha_Pagina{
          }
 
          //Ir até folha recusivamente
-         long duplicada = create(chave, dado, descida);
+         duplicada = create(chave, dado, descida);
 
          //Se houve criação de Folha/Pagina
 /*
@@ -565,13 +565,13 @@ PENDENTE
 
             //Escrever irma no arquivo
             data = fa_irma.toByteArray();
-            novo_endereco = arq.length();
-            arq.seek(novo_endereco);
+            duplicada = arq.length();
+            arq.seek(duplicada);
             arq.writeInt(TAM_FOLHA);
             arq.write(data);
 
             //Atualizar folha original
-            fa.irma = novo_endereco;
+            fa.irma = duplicada;
             data = fa.toByteArray();
             arq.seek(endereco);
             arq.writeInt(TAM_FOLHA);
@@ -581,7 +581,7 @@ PENDENTE
       else{
          throw new Exception("CREATE - Tamnho Incompatível");     
       } 
-      return novo_endereco;
+      return duplicada;
    }
 
 //------ Main para Teste -----
