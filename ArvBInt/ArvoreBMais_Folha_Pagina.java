@@ -216,6 +216,21 @@ class ArvoreBMais_Folha_Pagina{
       
       //metodos
       /*
+      inserir - Insere os dados de uma Página ou Folha na Página
+      @param long endereco, int chave, int dado
+      @param Página duplicada se necessário
+      */
+      private Pagina inserir(long endereco, int chave, int dado){
+         Pagina pg_dup = null;
+
+/*
+CONTINUAR
+*/ 
+
+         return pg_dup;
+      }
+   
+      /*
       print - mostra a Pagina   
       */
       protected void print(){
@@ -300,12 +315,7 @@ class ArvoreBMais_Folha_Pagina{
          if(fordem != ORDEM)
             throw new Exception("Ordem Arquivo Incompatível");
       }
-   }
-
-   //Ordem padrão 5
-   public ArvoreBMais_Folha_Pagina(String nome) throws Exception{
-     this(nome, 5); 
-   }
+   } 
 
    //Metodos
 
@@ -483,7 +493,7 @@ class ArvoreBMais_Folha_Pagina{
                   novo_dado = fa_raiz_ant.dados[fa_raiz_ant.n_chaves-1];
                }
                else{
-                  throw new Exception("CREATE - Tamnho Incompatível");     
+                  throw new Exception("CREATE - Tamnho Incompatível - 1");     
                }
                
                //criar nova Página raiz
@@ -521,7 +531,7 @@ class ArvoreBMais_Folha_Pagina{
       long duplicada = -1;
       arq.seek(endereco);
       int tamanho = arq.readInt();
-            
+      int i;      
       //Se for Página
       if(tamanho == TAM_PAGINA){
                   
@@ -533,20 +543,98 @@ class ArvoreBMais_Folha_Pagina{
 
          //Verificar por onde descer
          long descida = pg.ponteiros[0];
-         for(int i=0; i<pg.n_chaves && (chave>pg.chaves[i] || 
+         for(i=0; i<pg.n_chaves && (chave>pg.chaves[i] || 
               (chave==pg.chaves[i] && dado>pg.dados[i])); i++){
             descida = pg.ponteiros[i+1];
          }
+
 
          //Ir até folha recusivamente
          duplicada = create(chave, dado, descida);
 
          //Se houve criação de Folha/Pagina
+         if(duplicada != -1){
+            int nova_chave;
+            int novo_dado;
+            arq.seek(descida);
+            tamanho = arq.readInt();
+            
+            //Se os filhos são Páginas
+            if(tamanho == TAM_PAGINA){
+               //Preencher Página antiga atualizada
+               Pagina pg_ant = new Pagina();
+               data = new byte[TAM_PAGINA];
+               arq.read(data);
+               pg_ant.fromByteArray(data);
+               
+               //dados novos
+               nova_chave = pg_ant.chaves[pg_ant.n_chaves-1];
+               novo_dado = pg_ant.dados[pg_ant.n_chaves-1];
+         
+               //Se necessário Atualiza a Página atual
+               if(i<pg.n_chaves){
+                  pg.chaves[i] = nova_chave;
+                  pg.dados[i] = novo_dado;
+               }
+
+               //Carregar Página nova
+               arq.seek(duplicada);
+               if(TAM_PAGINA != arq.readInt()) {
+                  throw new Exception("CREATE - Tamnho Incompatível - 2");     
+               }
+               
+               Pagina pg_nova = new Pagina();
+               arq.read(data);
+               pg_nova.fromByteArray(data);
+               nova_chave = pg_nova.chaves[pg_nova.n_chaves-1];
+               novo_dado = pg_nova.dados[pg_nova.n_chaves-1];
+
+            }
+            //Se os filhos são Folhas
+            else if(tamanho == TAM_FOLHA){
+               
+               //Carregar Folha antiga atualizada
+               Folha fa_ant = new Folha();
+               data = new byte[TAM_FOLHA];
+               arq.read(data);
+               fa_ant.fromByteArray(data);
+            
+               //dados novos
+               nova_chave = fa_ant.chaves[fa_ant.n_chaves-1];
+               novo_dado = fa_ant.dados[fa_ant.n_chaves-1];
+               
+               //Se necessário Atualiza a Página atual           
+               if(i<pg.n_chaves){
+                  pg.chaves[i] = nova_chave;
+                  pg.dados[i] = novo_dado;
+               } 
+  
+               //Carregar Folha nova
+               arq.seek(duplicada);
+               if(TAM_FOLHA != arq.readInt()){
+                  throw new Exception("CREATE - Tamnho Incompatível - 3");     
+               }
+
+               Folha fa_nova = new Folha();
+               arq.read(data);
+               fa_nova.fromByteArray(data);
+               nova_chave = fa_nova.chaves[fa_nova.n_chaves-1];
+               novo_dado = fa_nova.dados[fa_nova.n_chaves-1];
+               
+            }
+            else{
+               throw new Exception("CREATE - Tamnho Incompatível - 4");
+            }
+                           
+            //Inserir nova Folha ou Página na Página
+            //Se necessário duplicar
+            Pagina pg_dup = pg.inserir(duplicada, nova_chave, novo_dado);
 /*
+CONTINUAR
+*/
 
-PENDENTE
 
-*/         
+         }       
       }
 
       //Se for Folha
@@ -579,7 +667,7 @@ PENDENTE
          } 
       }
       else{
-         throw new Exception("CREATE - Tamnho Incompatível");     
+         throw new Exception("CREATE - Tamnho Incompatível - 5");     
       } 
       return duplicada;
    }
