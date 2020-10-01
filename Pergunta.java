@@ -87,8 +87,6 @@ class Pergunta implements Registro{
     private static String[] tratarChaves(String chaves){
       //Decompor caracteres especiais
       chaves = Normalizer.normalize(chaves, Normalizer.Form.NFD);
-      //Continuar somente com caracteres ASCII e transformar todos em minúsculos
-      chaves = chaves.replaceAll("[^\\p{ASCII}]", "").toLowerCase();
 
       return chaves.split(";");
     }
@@ -108,8 +106,8 @@ class Pergunta implements Registro{
          String[] chavesArray = tratarChaves(chaves);
 
          System.out.println("\nCONFIRME A CRIAÇÃO DA PERGUNTA: ");
-         System.out.println("\""+buffer+"\"");
-         System.out.println("\nQUE CONTÉM AS PALAVRAS CHAVE: ");
+         System.out.println("\""+buffer+"\"\n");
+         System.out.println("\nQUE CONTÉM AS PALAVRAS CHAVE: \"");
          System.out.println("\""+chaves+"\"");
 
          System.out.print("(SIM(S) NÃO(N)): ");
@@ -125,10 +123,11 @@ class Pergunta implements Registro{
             //Incluindo palavras chave
             for(int i = 0; i < chavesArray.length; i++){
                str = chavesArray[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
-               listaChaves.create(str, nova.idPergunta);
+               listaChaves.create(str.replace(" ",""), nova.idPergunta);
             }
 
             System.out.println("Pergunta incluída com sucesso!");
+            listaChaves.print();   
          }else{
             System.out.println("Inclusão de pergunta cancelada.");
          }
@@ -136,6 +135,7 @@ class Pergunta implements Registro{
       }else{
          System.out.println("Inclusão de pergunta cancelada. Alguns campos não foram preenchidos.");
       }
+      Menu.pause(leitor);
    }
 
    /*
@@ -170,9 +170,9 @@ class Pergunta implements Registro{
             if(!buffer.equals("")){
                System.out.println("\nCONFIRME A ALTERAÇÃO DA PERGUNTA: ");
                System.out.println("\""+buffer+"\"");
-               System.out.println("Palavras chave removidas:");
+               System.out.println("Palavras chave removidas:\n");
                System.out.println(removidas);
-               System.out.println("Palavras chave incluídas:");
+               System.out.println("Palavras chave incluídas:\n");
                System.out.println(incluidas);
 
                System.out.print("(SIM(S) NÃO(N)): ");
@@ -200,24 +200,29 @@ class Pergunta implements Registro{
                   String str;
                   for(int i = 0; i < removidasArray.length; i++){ 
                      str = removidasArray[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
-                     listaChaves.delete(str, p.idPergunta);
+                     listaChaves.delete(str.replace(" ",""), p.idPergunta);
                   }
 
                   for(int i = 0; i < incluidasArray.length; i++){
                      novasChaves.add(incluidasArray[i]);
                      str = incluidasArray[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
-                     listaChaves.create(str, p.idPergunta);
+                     listaChaves.create(str.replace(" ",""), p.idPergunta);
                   }
 
-                  //Copiando novas chaves
-                  p.palavrasChave = new String[novasChaves.size()];
-                  novasChaves.toArray(p.palavrasChave);
-                  
-                  p.pergunta = buffer;
-                  arquivo.update(p);  
-                  System.out.println("Pergunta alterada com sucesso!");          
+                  if(novasChaves.size() > 0){
+                     //Copiando novas chaves
+                     p.palavrasChave = new String[novasChaves.size()];
+                     novasChaves.toArray(p.palavrasChave);
+                     
+                     p.pergunta = buffer;
+                     arquivo.update(p);  
+                     System.out.println("Pergunta alterada com sucesso!");    
+                  } else{
+                     System.out.println("Alteração de pergunta cancelada. Sua pegunta não pode ficar" + 
+                     "sem chave(s).");
+                  }     
                }else{
-                  System.out.println("Alteração de pergunta cancelada.");
+                  System.out.println("Alteração de pergunta cancelada. Sua pergunta não pode ser vazia.");
                }
 
             }else{
@@ -239,7 +244,7 @@ class Pergunta implements Registro{
    public static void arquivarPergunta(Scanner leitor, int idUsuario) throws Exception{
       printPerguntas(idUsuario, false);
 
-      System.out.println("\nQual pergunta dejesa alterar: ");
+      System.out.println("\nQual pergunta dejesa arquivar: ");
       int escolha = Menu.lerEscolha();
 
       if(0 < escolha && escolha <= listaPerguntas.length){
@@ -249,16 +254,21 @@ class Pergunta implements Registro{
          if(p.ativa){
             System.out.println("Pergunta escolhida: "+p.pergunta);
              
-            
             System.out.println("\nCONFIRME O ARQUIVAMENTO DA PERGUNTA: ");
             System.out.print("(SIM(S) NÃO(N)): ");
             String confirmacao = leitor.nextLine();
             confirmacao = confirmacao.toUpperCase();
       
             if(confirmacao.contains("S")){
-               System.out.println("Pergunta alterada com sucesso!");
+               String str;
+               for(int i = 0; i < p.palavrasChave.length; i++){
+                  str = p.palavrasChave[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+                  listaChaves.delete(str.replace(" ",""), p.idPergunta);
+               }
+
                p.ativa = false;
-               arquivo.update(p);            
+               arquivo.update(p);  
+               System.out.println("Pergunta alterada com sucesso!");          
             }else{
                System.out.println("Alteração de pergunta cancelada.");
             }
@@ -268,7 +278,6 @@ class Pergunta implements Registro{
       }else{
          System.out.println("\nPergunta escolhida não existe, tente outra.");
       }
-
       Menu.pause(leitor);
    }
 
