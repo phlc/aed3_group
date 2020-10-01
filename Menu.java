@@ -40,7 +40,7 @@ public class Menu{
    public static String mensagemErro = "\nERRO\n" + "\nDesculpe, ocorreu um" + "erro inesperado\n" 
                                        + "Tente novamente mais tarde";
 
-   private static Usuario online = null;
+   private static Usuario online = null ;
    private static int notificacoes; //seria isso um dado do usuário armazenado no arquivo? Se sim, criar novo campo no BD
    private static Scanner leitor = new Scanner(System.in);
    private static byte estado;

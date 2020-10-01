@@ -310,7 +310,7 @@ class Pergunta implements Registro{
       this.palavrasChave = _palavrasChave;
    }
 
-//metodos
+   //metodos
    /*
    getID - retorna o ID de um objeto
    @return int id
