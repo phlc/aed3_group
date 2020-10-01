@@ -1,11 +1,11 @@
 /*
-Ciencia da Computacao - Pucminas
-AED3 - manha
-Larissa Domingues Gomes
-Marcelo Franca Cabral
-Pedro Henrique Lima Carvalho
-Tarcila Fernanda Resende da Silva
-*/
+ * Ciencia da Computacao - PUC minas
+ * AED3 - manhã
+ * Larissa Domingues Gomes
+ * Marcelo Franca Cabral
+ * Pedro Henrique Lima Carvalho
+ * Tarcila Fernanda Resende da Silva
+ */
 
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
@@ -20,6 +20,8 @@ import aed3.ArvoreBMais_Int_Int;
 import aed3.ListaInvertida;
 import java.util.ArrayList;
 import java.text.Normalizer;
+import java.util.HashSet;
+import java.util.Arrays;
 
 /*
 Classe Usuario
@@ -54,12 +56,20 @@ class Pergunta implements Registro{
          Pergunta p = arquivo.read(listaPerguntas[i]);
          if(p.ativa){
             System.out.println("\n" + (i+1) + ".\n" + formatter.format(new Date(p.criacao)) + "\n" + p.pergunta);
-            System.out.println("[" + p.palavrasChave + "] ");
+            System.out.print("Palavras chave: ");
+            
+            for(int j = 0; j < p.palavrasChave.length; j++)
+               System.out.print("[" + p.palavrasChave[j] + "] ");
+            System.out.println();
          }
          else if(printArq){
             System.out.println("\n" + (i+1) + ". (Arquivada)\n" + formatter.format(new Date(p.criacao)) 
             + "\n" + p.pergunta);
-            System.out.print("[" + p.palavrasChave + "] ");
+            System.out.print("Palavras chave: ");
+            
+            for(int j = 0; j < p.palavrasChave.length; j++)
+               System.out.print("[" + p.palavrasChave[j] + "] ");
+            System.out.println();
          }
       }
    }
@@ -107,13 +117,16 @@ class Pergunta implements Registro{
          confirmacao = confirmacao.toUpperCase();
  
          if(confirmacao.contains("S")){
-            Pergunta nova = new Pergunta(idUsuario, buffer, chaves);
+            Pergunta nova = new Pergunta(idUsuario, buffer, chavesArray);
             arquivo.create(nova);            
             indice.create(idUsuario, nova.getID());
-            
+
+            String str;
             //Incluindo palavras chave
-            for(int i = 0; i < chavesArray.length; i++)
-               listaChaves.create(chavesArray[i], nova.idPergunta);
+            for(int i = 0; i < chavesArray.length; i++){
+               str = chavesArray[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+               listaChaves.create(str, nova.idPergunta);
+            }
 
             System.out.println("Pergunta incluída com sucesso!");
          }else{
@@ -143,22 +156,72 @@ class Pergunta implements Registro{
             System.out.println("Pergunta escolhida: "+p.pergunta);
             System.out.println("\nInsira a alteração da pergunta:");
             String buffer = leitor.nextLine();
+
+            System.out.println("Palavras chave atual: ");
+            for(int j = 0; j < p.palavrasChave.length; j++)
+               System.out.print("[" + p.palavrasChave[j] + "] ");
+
+            System.out.println("\n\nInsira palavras chaves a serem removidas:");
+            String removidas = leitor.nextLine();
+
+            System.out.println("\nInsira palavras chaves a serem incluídas");
+            String incluidas = leitor.nextLine();
             
             if(!buffer.equals("")){
                System.out.println("\nCONFIRME A ALTERAÇÃO DA PERGUNTA: ");
                System.out.println("\""+buffer+"\"");
+               System.out.println("Palavras chave removidas:");
+               System.out.println(removidas);
+               System.out.println("Palavras chave incluídas:");
+               System.out.println(incluidas);
+
                System.out.print("(SIM(S) NÃO(N)): ");
                String confirmacao = leitor.nextLine();
                confirmacao = confirmacao.toUpperCase();
       
                if(confirmacao.contains("S")){
-                  System.out.println("Pergunta alterada com sucesso!");
+                  String[] removidasArray = tratarChaves(removidas);
+                  String[] incluidasArray = tratarChaves(incluidas);
+
+                  //Remover e incluir chaves novas
+                  HashSet<String> incluir = new HashSet<String>(Arrays.asList(incluidasArray)); 
+                  HashSet<String> remover = new HashSet<String>(Arrays.asList(removidasArray)); 
+                  HashSet<String> novasChaves = new HashSet<String>(Arrays.asList(p.palavrasChave));
+                  
+                  incluir.removeAll(novasChaves);
+                  remover.retainAll(novasChaves);
+                  novasChaves.removeAll(remover);
+
+                  removidasArray = new String[remover.size()];
+                  remover.toArray(removidasArray);
+                  incluidasArray = new String[incluir.size()];
+                  incluir.toArray(incluidasArray);
+
+                  String str;
+                  for(int i = 0; i < removidasArray.length; i++){ 
+                     str = removidasArray[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+                     listaChaves.delete(str, p.idPergunta);
+                  }
+
+                  for(int i = 0; i < incluidasArray.length; i++){
+                     novasChaves.add(incluidasArray[i]);
+                     str = incluidasArray[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+                     listaChaves.create(str, p.idPergunta);
+                  }
+
+                  //Copiando novas chaves
+                  p.palavrasChave = new String[novasChaves.size()];
+                  novasChaves.toArray(p.palavrasChave);
+                  
                   p.pergunta = buffer;
-                  arquivo.update(p);            
+                  arquivo.update(p);  
+                  System.out.println("Pergunta alterada com sucesso!");          
                }else{
                   System.out.println("Alteração de pergunta cancelada.");
                }
 
+            }else{
+               System.out.println("Alteração de pergunta cancelada.");
             }
          }else{
             System.out.println("\nPergunta escolhida arquivada, tente outra.");
@@ -170,8 +233,7 @@ class Pergunta implements Registro{
       Menu.pause(leitor);
    }
 
-   /*
-    * arquivarPergunta - Método para usuário arquivar uma pergunta 
+   /* arquivarPergunta - Método para usuário arquivar uma pergunta 
     * @param Scanner leitor, int idUsuario
     */
    public static void arquivarPergunta(Scanner leitor, int idUsuario) throws Exception{
@@ -217,19 +279,19 @@ class Pergunta implements Registro{
    public short nota;
    public String pergunta;
    public boolean ativa;
-   public String palavrasChave;
+   public String[] palavrasChave;
 
    //construtores
    public Pergunta(){
-      this(-1, -1, -1, Short.MIN_VALUE, "", false, "");
+      this(-1, -1, -1, Short.MIN_VALUE, "", false, null);
    }
 
-   public Pergunta(int _idUsuario, String _pergunta, String _palavrasChave){
+   public Pergunta(int _idUsuario, String _pergunta, String[] _palavrasChave){
       this(-1, _idUsuario, System.currentTimeMillis(), (short)0, _pergunta, true, _palavrasChave);
    }
 
    public Pergunta(int _idPergunta, int _idUsuario, long _criacao, short _nota, String _pergunta, boolean _ativa, 
-                   String _palavrasChave){
+                   String[] _palavrasChave){
       this.idUsuario = _idUsuario;
       this.idPergunta = _idPergunta;
       this.criacao = _criacao;
@@ -270,7 +332,10 @@ class Pergunta implements Registro{
       dos.writeShort(this.nota);
       dos.writeUTF(this.pergunta);
       dos.writeBoolean(this.ativa);
-      dos.writeUTF(this.palavrasChave);
+      dos.writeInt(this.palavrasChave.length);
+
+      for(int i = 0; i < this.palavrasChave.length; i++)
+         dos.writeUTF(this.palavrasChave[i]);
 
       return(baos.toByteArray());
    }
@@ -289,7 +354,12 @@ class Pergunta implements Registro{
       this.nota = dis.readShort();
       this.pergunta = dis.readUTF();
       this.ativa = dis.readBoolean();
-      this.palavrasChave = dis.readUTF();
+      int tam = dis.readInt();
+      this.palavrasChave = new String[tam];
+
+      for(int i = 0; i < tam; i++)
+         this.palavrasChave[i] = dis.readUTF();
+
    }
 
    /*
