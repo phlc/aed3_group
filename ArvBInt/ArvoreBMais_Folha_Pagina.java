@@ -148,7 +148,7 @@ class ArvoreBMais_Folha_Pagina{
             
          }
          else
-            throw new Exception("CREATE - Número de Chaves Incompatível");
+            throw new Exception("INSERIR FOLHA - Número de Chaves Incompatível");
          return fa_irma;
       }
       
@@ -217,15 +217,120 @@ class ArvoreBMais_Folha_Pagina{
       //metodos
       /*
       inserir - Insere os dados de uma Página ou Folha na Página
-      @param long endereco, int chave, int dado
+      @param long endereco,int pos_des, int chave, int dado
       @param Página duplicada se necessário
       */
-      private Pagina inserir(long endereco, int chave, int dado){
+      private Pagina inserir(long endereco, int pos_des, int chave, int dado)throws Exception{
          Pagina pg_dup = null;
 
-/*
-CONTINUAR
-*/ 
+         //Não precisar duplicar
+         if (this.n_chaves<MAX){
+            
+            //Se o último filho foi duplicado
+            if(pos_des == this.n_chaves){
+               this.chaves(pos_des) = chave;
+               this.dados(pos_des) = dado;
+               this.ponteiros(pos_des+1) = endereco;
+               this.n_chaves++;
+            }
+            
+            //Se filho diferente do último foi duplicado  
+            else if(pos_des < this.n_chaves){
+               int i = n_chaves-1;            
+ 
+               //muda último ponteiro
+               this.ponteiro[i+1] = this.ponteiro[i+2]; 
+
+               //verifica e muda os demais
+               for( ; i<=0; i--){
+                  if(this.chaves[i]>chave || (this.chaves[i]==chave && this.dados[i]>dados)){
+                     this.ponteiros[i+1] = this.ponteiros[i];
+                     this.chaves[i+1] = this.chaves[i];
+                     this.dados[i+1] = this.dados[i];
+                  }
+                  else{
+                     break;
+                  }
+               this.ponteiros[i] = endereco;
+               this.chaves[i] = chave;
+               this.dados[i] = dado;
+               this.n_chaves++;
+               }
+            }
+            else
+               throw new Exception("INSERIR PÁGINA - Posição Descida Incompatível - 1"); 
+            
+         }
+
+         //Se precisar duplicar
+         else if(this.n_chaves==MAX){
+            pg_dup = new Pagina();
+            int i = this.n_chaves -1;
+            int j = this.n_chaves/2 -1;
+               
+            //Se o último filho foi duplicado
+            if(pos_des == this.n_chaves){
+               pg_dup.ponteiros[j+1] = endereco;
+               pg_dup.chave[j] = chave;
+               pg_dup.dados[j] = dado;
+               pg_dup.ponteiros[j] = this.ponteiros[i+1];
+               this.ponteiros[i+1] = -1;               
+               j--;
+               pg_dup.n_chaves++;              
+
+               for(; j<=0; j--, i--){
+                  pg_dup.ponteiros[j] = this.ponteiros[i];
+                  this.ponteiros[i] = -1;
+                  pg_dup.chaves[j] = this.chaves[i];
+                  this.chaves[i] = -1;
+                  pg_dup.dados[j] = this.dados[i];
+                  this.dados[i] = -1;
+                  this.n_chaves--;
+                  pg_dup.n_chaves++;
+               }   
+            } 
+            else if(pos_des < this.n_chaves){
+               boolean inserido = false;
+               pg_dup.ponteiros[j+1] = this.ponteiros[i+1];
+               
+               while(j<=0){
+
+                  //movimenta
+                  if(chave<this.chaves[i] || (chave==this.chaves[i] && dado<this.dados[i])){
+                     pg_dup.ponteiros[j] = this.ponteiros[i];
+                     this.ponteiros[i] = -1;
+                     pg_dup.chave[j] = this.chaves[i];
+                     this.chaves[i] = -1;
+                     pg_dup.dados[j] = this.dados[i];
+                     this.dados[i] = -1;
+                     this.n_chaves--;
+                     pg_dup.n_chaves++;
+                     j--;
+                     i--;   
+                  }
+
+                  //insere novos dados
+                  else{
+                     inserido = true;
+                     pg_dup.ponteiros[j] = endereco;
+                     pg_dup.chave[j] = chave;
+                     pg_dup.dados[j] = dado;
+                     pg_dup.n_chaves++;
+                     j--;
+                  }
+
+                  //Se novos dados não inseridos
+                  if(!inserido)
+                     this.inserir(endereco, pos_des, chave, dado);
+               }       
+         
+            }
+            else
+               throw new Exception("INSERIR PÁGINA - Posição Descida Incompatível - 2");
+
+         }
+         else
+            throw new Exception("INSERIR PÁGINA - Número de chaves Incompatível");
 
          return pg_dup;
       }
@@ -432,6 +537,13 @@ CONTINUAR
          arq.seek(RAIZ);
          long raiz = arq.readLong(); //endereço do nó atual
          
+         //verificar se conjunto chave-dado já existe
+         int[] conjuntos = this.read(chave);
+         for(int i=0; i<conjuntos.length; i++){
+            if(dado == conjuntos[i])
+               return false;
+         }  
+        
          //raiz vazia
          if(raiz == -1){
             Folha fa = new Folha();
@@ -607,20 +719,20 @@ CONTINUAR
                if(i<pg.n_chaves){
                   pg.chaves[i] = nova_chave;
                   pg.dados[i] = novo_dado;
-               } 
-  
-               //Carregar Folha nova
-               arq.seek(duplicada);
-               if(TAM_FOLHA != arq.readInt()){
-                  throw new Exception("CREATE - Tamnho Incompatível - 3");     
-               }
-
-               Folha fa_nova = new Folha();
-               arq.read(data);
-               fa_nova.fromByteArray(data);
-               nova_chave = fa_nova.chaves[fa_nova.n_chaves-1];
-               novo_dado = fa_nova.dados[fa_nova.n_chaves-1];
                
+  
+                  //Carregar Folha nova
+                  arq.seek(duplicada);
+                  if(TAM_FOLHA != arq.readInt()){
+                     throw new Exception("CREATE - Tamnho Incompatível - 3");     
+                  }
+
+                  Folha fa_nova = new Folha();
+                  arq.read(data);
+                  fa_nova.fromByteArray(data);
+                  nova_chave = fa_nova.chaves[fa_nova.n_chaves-1];
+                  novo_dado = fa_nova.dados[fa_nova.n_chaves-1];
+               }
             }
             else{
                throw new Exception("CREATE - Tamnho Incompatível - 4");
@@ -628,7 +740,7 @@ CONTINUAR
                            
             //Inserir nova Folha ou Página na Página
             //Se necessário duplicar
-            Pagina pg_dup = pg.inserir(duplicada, nova_chave, novo_dado);
+            Pagina pg_dup = pg.inserir(duplicada, i,  nova_chave, novo_dado);
 /*
 CONTINUAR
 */
