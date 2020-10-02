@@ -349,9 +349,151 @@ class ArvoreBMais_Folha_Pagina{
 
    /*
    Create - Cria no arquivo um novo registro de chave | dado
-   @param
-   @return
+   @param int chave, int dado
+   @return boolean sucesso
    */
+   public boolean create(int chave, int dado)throws Exception{
+      boolean resp = false;
+      
+      //Testar se inputs são válidos
+      if(chave<0 || dado<0)
+         return false;
+
+      //Testar se conjunto chave-dado já existe
+      int[] conjunto = this.read(chave);
+      for (int existente : conjunto){
+         if(existente == dado){
+            return false;
+         }  
+      }
+      
+      //Ler raiz
+      arq.seek(RAIZ);
+      long raiz = arq.readLong();
+      
+      //Se não existe raiz
+      if(raiz == -1){
+         //Cria nova folha
+         Folha fa = new Folha();
+         fa.n_chaves = 1;
+         fa.chaves[0] = chave;
+         fa.dados[0] = dado;
+
+         //Escreve nova folha no arquivo
+         raiz = arq.length();
+         arq.seek(raiz);
+         arq.writeInt(TAM_FOLHA);
+         arq.write(fa.toByteArray());
+   
+         //Escreve endereço da folha em RAIZ
+         arq.seek(RAIZ);
+         arq.writeLong(raiz);
+
+         resp = true;
+      }
+
+      //Se já existe raiz
+      else{
+         long nova = create(raiz, chave, dado);
+
+         //se houve duplicação
+         if(nova != -1){
+            arq.seek(raiz);
+            int tamanho = arq.readInt();
+            
+            //Se a raiz era Folha
+            if(tamanho == TAM_FOLHA){
+
+               //Carrega raiz antiga
+               Folha fa = new Folha();
+               byte[] data = new byte[TAM_FOLHA];
+               arq.read(data);
+               fa.fromByteArray(data);
+
+               //Cria nova Página para ser raiz
+               Pagina pg = new Pagina();
+               pg.n_chaves = 1;
+               pg.ponteiros[0] = raiz;
+               pg.chaves[0] = fa.chaves[fa.n_chaves-1];
+               pg.dados[0] = fa.dados[fa.n_chaves-1];
+               pg.ponteiros[1] = nova;
+
+               //Escrever nova Página em RAIZ
+               raiz = arq.length();
+               arq.seek(raiz);
+               arq.writeInt(TAM_PAGINA);
+               arq.write(pg.toByteArray());
+               arq.seek(RAIZ);
+               arq.writeLong(raiz);
+
+               resp = true;
+            }
+
+            //Se nova é Página
+            else if(tamanho == TAM_PAGINA){
+               
+            }
+            else
+               throw new Exception("CREATE - Tamanho Incompatível - 1");
+         }
+      }
+      return resp;
+   }
+   /*
+   Create - Overload
+   @param long endereco, int chave, int dado
+   @return long nova - Se necessário duplicar
+   */
+   private long create(long endereco, int chave, int dado)throws Exception{
+      long nova = -1;
+
+      //Ler endereço
+      arq.seek(endereco);
+      int tamanho = arq.readInt();
+      
+      //Se for Folha
+      if(tamanho == TAM_FOLHA){
+         //Carregar folha
+         Folha fa = new Folha();
+         byte[] data = new byte[TAM_FOLHA];
+         arq.read(data);
+         fa.fromByteArray(data);
+
+         //Verificar folha tem espaço
+         if(fa.n_chaves < MAX){
+            boolean inserido = false;
+            int i = fa.n_chaves -1;
+            while(!inserido){
+               if(i>-1 && (fa.chaves[i]>chave || (fa.chaves[i]==chave && fa.dados[i]>dado))){
+                  fa.chaves[i+1] = fa.chaves[i];
+                  fa.dados[i+1] = fa.dados[i];
+               }
+               else{
+                  fa.chaves[i+1] = chave;
+                  fa.dados[i+1] = dado;
+                  inserido = true;
+               }
+               i--;
+            }      
+            fa.n_chaves++;
+
+            //Escrever Folha atualizada
+            arq.seek(endereco);
+            arq.writeInt(TAM_FOLHA);
+            arq.write(fa.toByteArray());
+         }
+         else{
+
+         }
+      }
+      else if(tamanho == TAM_PAGINA){
+
+      }
+      else
+         throw new Exception("CREATE - Tamanho Incompatível - 2");
+
+      return nova;
+   }
 
 //------ Main para Teste -----
    public static void main(String[] args)throws Exception{
@@ -360,7 +502,8 @@ class ArvoreBMais_Folha_Pagina{
       arvore.create(0, 01);
       arvore.create(1, 11);
       arvore.create(1, 12);
-      arvore.create(1, 13);
+//      arvore.create(1, 13);
+
       int[] resp = arvore.read(1);
       if(resp.length > 0){
          for(int i=0; i<resp.length; i++){
