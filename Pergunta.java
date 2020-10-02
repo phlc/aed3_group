@@ -22,9 +22,19 @@ import java.util.ArrayList;
 import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Collections;
+
+//comparador para ordenar as perguntas em ordem decrescente.
+class Comparador implements Comparator<Pergunta>{
+   @Override
+   public int compare(Pergunta a, Pergunta b){
+      return a.nota > b.nota ? -1 : (a.nota == b.nota ? 0 : 1);
+   }
+}
 
 /*
-Classe Usuario
+Classe Pergunta
 */
 
 class Pergunta implements Registro{
@@ -280,6 +290,62 @@ class Pergunta implements Registro{
       }
       Menu.pause(leitor);
    }
+   /**
+    * pesquisarPalavras - Método que permite a pesquisa de um conjunto de perguntas por meio de uma ou mais palavras-chave
+    * @param Scanner leitor
+    * @return Pergunta[] arranjo com as perguntas associadas ao conjunto de palavras-chave.
+   */
+   public static Pergunta[] pesquisarPalavras(Scanner leitor){
+      System.out.print("Insira as palavras-chave pelas quais deseja buscar: ");
+      String buffer = leitor.nextLine();
+      Pergunta[] perguntas = null;
+      if(!buffer.equals("")){
+         String[] chaves = tratarChaves(buffer);
+         String str = chaves[0].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+         HashSet<int> resp = new HashSet<int>(Arrays.asList(listaChaves.read(str)));
+         for(int i = 1; i < chaves.length; i++){
+            str = chaves[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+            HashSet<int> temp = new HashSet<int>(Arrays.asList(listaChaves.read(str)));
+            resp.retainAll(temp);
+         }
+         int[] idsArray = new int[resp.length()];
+         resp.toArray(idsArray);
+         perguntas = new Pergunta[idsArray.length];
+         for(int i = 0; i < perguntas.length; i++){
+            perguntas[i] = arquivo.read(idsArray[i]);
+         }
+      }else{
+         System.out.println("Busca por perguntas cancelada. Alguns campos não foram preenchidos.");
+      }
+      return perguntas;
+   }
+
+   public static void printPerguntaCompleta(Pergunta p){
+      System.out.println();
+      System.out.println("==> " + p.pergunta + "\n");
+      System.out.println("Criado em " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) + 
+                                "às " + (new SimpleDateFormat("hh:mm")).format(p.criacao) + 
+                               "por " + Acesso.arquivo.read(p.idUsuario));
+      System.out.println("Palavras chave: ");
+      int len = p.palavrasChave.length;
+      for(int i = 0; i < len; i++){
+         System.out.print(p.palavrasChave[i]);
+         if(i != len-1) System.out.print(";");
+      }
+      System.out.println("Nota: " + p.nota + "\n");
+   }
+
+   public static void listarResumo(Pergunta[] perguntas){
+      for(int i = 0; i < perguntas.length; i++){
+         System.out.println(i+1 + ". " + perguntas[i].pergunta + "\nNota: " + perguntas[i].nota + "\n");
+      }
+   }
+
+   public static void ordenarPerguntas(Pergunta[] perguntas){
+      Collections.sort(perguntas, new Comparador());
+   }
+
+
 
    //atributos
    public int idUsuario; //chave de busca
