@@ -36,6 +36,8 @@ public class Menu{
    public static String gerencPerg = "\nPERGUNTAS\n" + "\n[1] Listar\n" + "[2] Incluir\n"
                                        + "[3] Alterar\n" + "[4] Arquivar" + "\n[0] Sair\n" 
                                        + "\nOpção: ";
+   
+   public static String consultPerg = "\n1) Responder\n" + "2) Comentar\n" + "3) Avaliar\n" + "\n0) Retornar\n" + "\nOpção: ";
 
    public static String mensagemErro = "\nERRO\n" + "\nDesculpe, ocorreu um" + "erro inesperado\n" 
                                        + "Tente novamente mais tarde";
@@ -127,7 +129,6 @@ public class Menu{
                telaErro();
             }
             break;
-            //desenvolvimento parou aqui. Código ainda não compilado
          case 2:
             try{
                Acesso.novoUsuario(leitor);
@@ -205,8 +206,7 @@ public class Menu{
             break;
 
          case 2:
-            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
-            pause(leitor);
+            menuConsultarPerg();
             break;
 
          case 3:
@@ -275,6 +275,42 @@ public class Menu{
       }
    }
 
+   public static void menuConsultarPerg(){
+      clear();
+      System.out.println(header);
+      System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
+      boolean permitirEscolha = false;
+      try{
+         permitirEscolha = Pergunta.consultarPerguntas(leitor);
+      }catch(Exception e){
+         telaErro();
+      }
+      int escolha;
+
+      if(permitirEscolha) escolha = lerEscolha(); else{ escolha = 0; pause(leitor); }
+
+      switch(escolha){
+         case 0:
+            estado = 2;
+            break;
+         case 1:
+            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
+            pause(leitor);
+            break;
+         case 2:
+            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
+            pause(leitor);
+            break;
+         case 3:
+            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
+            pause(leitor);
+            break;
+         default:
+            System.out.println("\nEscolha inválida");
+            pause(leitor);
+      }
+   }
+
    /*
     * main - funcao principal de interação com o usuário
     */
@@ -294,6 +330,9 @@ public class Menu{
                   break;
                case 3:
                   menuGerencPerg();
+                  break;
+               case 4:
+                  menuConsultarPerg();
                   break;
                default:
                   telaErro();
