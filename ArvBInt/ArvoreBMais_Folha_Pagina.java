@@ -163,7 +163,7 @@ class ArvoreBMais_Folha_Pagina{
          System.out.print("Página(n_chaves: "+this.n_chaves+" |");
          for (int i=0; i<MAX; i++){
             System.out.print(" p: "+this.ponteiros[i]+" ch: "+this.chaves[i]+" da: "
-                              +this.dados+" |");
+                              +this.dados[i]+" |");
          }
          System.out.println(" p: "+this.ponteiros[MAX]+" )");
       } 
@@ -276,8 +276,7 @@ class ArvoreBMais_Folha_Pagina{
          Pagina pg = new Pagina();
          byte[] data = new byte[TAM_PAGINA];
          arq.read(data);
-         pg.fromByteArray(data);     
-    
+         pg.fromByteArray(data);        
          //Verificar por onde descer
          long descida = pg.ponteiros[0];
          for(int i=0; i<pg.n_chaves && chave>pg.chaves[i]; i++){
@@ -410,7 +409,7 @@ class ArvoreBMais_Folha_Pagina{
                arq.read(data);
                fa.fromByteArray(data);
 
-               //Cria nova Página para ser raiz
+               //Cria a primeira Página para ser raiz
                Pagina pg = new Pagina();
                pg.n_chaves = 1;
                pg.ponteiros[0] = raiz;
@@ -431,7 +430,8 @@ class ArvoreBMais_Folha_Pagina{
 
             //Se nova é Página
             else if(tamanho == TAM_PAGINA){
-               
+//nova pagina criar nova raiz               
+
             }
             else
                throw new Exception("CREATE - Tamanho Incompatível - 1");
@@ -482,15 +482,165 @@ class ArvoreBMais_Folha_Pagina{
             arq.writeInt(TAM_FOLHA);
             arq.write(fa.toByteArray());
          }
-         else{
 
+         //Se folha não tiver espaço - duplicar
+         else if (fa.n_chaves == MAX){
+            Folha fa_dup = new Folha();
+            boolean inserido = false;
+            int i = MAX/2 -1;
+            int j = MAX -1;
+
+            while(i>=0){
+               if(inserido || fa.chaves[j]>chave || (fa.chaves[j]==chave && fa.dados[j]>dado)){
+                  fa_dup.chaves[i] = fa.chaves[j];
+                  fa.chaves[j] = -1;
+                  fa_dup.dados[i] = fa.dados[j];
+                  fa.dados[j] = -1;
+                  i--;
+                  j--;
+                  fa_dup.n_chaves++;
+                  fa.n_chaves--;
+               }
+               else{
+                  fa_dup.chaves[i] = chave;
+                  fa_dup.dados[i] = dado;
+                  i--;
+                  fa_dup.n_chaves++;
+                  inserido = true;
+               }
+            }
+
+            //Se nao tiver sido inserido inserir na folha antiga
+            i = fa.n_chaves -1;
+            while(!inserido){
+               if(i>-1 && (fa.chaves[i]>chave || (fa.chaves[i]==chave && fa.dados[i]>dado))){
+                  fa.chaves[i+1] = fa.chaves[i];
+                  fa.dados[i+1] = fa.dados[i];
+               }
+               else{
+                  fa.chaves[i+1] = chave;
+                  fa.dados[i+1] = dado;
+                  inserido = true;
+                  fa.n_chaves++;
+               }
+               i--;
+            }
+ 
+            //Obter endereço Folha duplicada
+            nova = arq.length();
+
+            //Atualizar ponteiros para irmãs
+            fa_dup.irma = fa.irma;
+            fa.irma = nova;
+
+            //Escrever Folha nova
+            arq.seek(nova);
+            arq.writeInt(TAM_FOLHA);
+            arq.write(fa_dup.toByteArray());
+ 
+            //Escrever Folha atualizada
+            arq.seek(endereco);
+            arq.writeInt(TAM_FOLHA);
+            arq.write(fa.toByteArray());
+         }
+         else
+            throw new Exception("CREATE - Número de Chaves Incompatível - 1");
+      
+      }
+      
+      //Se for Página
+      else if(tamanho == TAM_PAGINA){
+         //Carregar Página
+         Pagina pg = new Pagina();
+         byte[] data = new byte[TAM_PAGINA];
+         arq.read(data);
+         pg.fromByteArray(data);
+
+         //Ir até a Folha
+         int i = 0;
+
+         while(i<pg.n_chaves&&(pg.chaves[i]<chave||(pg.chaves[i]==chave && pg.dados[i]<dado))){
+            i++;  
+         }
+
+         //DESCIDA RECURSIVA
+         long descida = pg.ponteiros[i];
+         nova = create(descida, chave, dado);
+
+         //Se houve duplicação
+         if(nova != -1){
+
+            arq.seek(nova);
+            tamanho = arq.readInt();
+
+            //Se couber na página
+            if(pg.n_chaves<MAX){
+               //Se for Folha
+               if(tamanho == TAM_FOLHA){
+         
+                  //Carregar Folha nova
+                  Folha fa_nova = new Folha();
+                  data = new byte[TAM_FOLHA];
+                  arq.read(data);
+                  fa_nova.fromByteArray(data);
+
+                  //Carrgar folha originaria
+                  arq.seek(descida);
+                  arq.readInt();
+                  Folha fa_orig = new Folha();
+                  arq.read(data);
+                  fa_orig.fromByteArray(data);
+
+                  if(i == pg.n_chaves){
+                     pg.chaves[i] = fa_orig.chaves[fa_orig.n_chaves-1];
+                     pg.dados[i] = fa_orig.dados[fa_orig.n_chaves-1];
+                     pg.ponteiros[i+1] = nova;
+                     pg.n_chaves++;
+                  }
+                  else if(i < pg.n_chaves){
+                     pg.ponteiros[pg.n_chaves+1] = pg.ponteiros[pg.n_chaves];
+                     int j = pg.n_chaves-1;
+                     for( ; j>i; j--){
+                        pg.ponteiros[j+1] = pg.ponteiros[j];
+                        pg.chaves[j+1] = pg.chaves[j];
+                        pg.dados[j+1] = pg.dados[j];
+                     }
+                     
+                     pg.ponteiros[j+1] = nova;
+                     pg.chaves[j+1] = fa_nova.chaves[fa_nova.n_chaves-1];
+                     pg.dados[j+1] = fa_nova.dados[fa_nova.n_chaves-1];
+                     pg.n_chaves++;
+
+                 }
+                  else
+                     throw new Exception("CREATE - Número de Chaves Incompatível - 2"); 
+ 
+                  //atualizar Página
+                  arq.seek(endereco);
+                  arq.writeInt(TAM_PAGINA);
+                  arq.write(pg.toByteArray());
+               
+               }
+               else if(tamanho == TAM_PAGINA){
+//nova pagina cabe
+               }  
+               else
+                  throw new Exception("CREATE - Tamanho Incompatível - 2");
+               
+               //Coube não há o que retornar
+               nova = -1;
+            }
+            
+            //Se não couber na página
+            else if(pg.n_chaves == MAX){
+//nao cabe
+            }
+            else
+               throw new Exception("CREATE - Número de Chaves Incompatível - 3");
          }
       }
-      else if(tamanho == TAM_PAGINA){
-
-      }
       else
-         throw new Exception("CREATE - Tamanho Incompatível - 2");
+         throw new Exception("CREATE - Tamanho Incompatível - 3");
 
       return nova;
    }
@@ -502,7 +652,13 @@ class ArvoreBMais_Folha_Pagina{
       arvore.create(0, 01);
       arvore.create(1, 11);
       arvore.create(1, 12);
-//      arvore.create(1, 13);
+      arvore.create(1, 13);
+
+      for(int i = 14; i<20; i++){
+         arvore.create(1, i);
+      }  
+
+
 
       int[] resp = arvore.read(1);
       if(resp.length > 0){
