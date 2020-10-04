@@ -329,7 +329,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * @param Scanner leitor
     * @return Pergunta[] arranjo com as perguntas associadas ao conjunto de palavras-chave.
    */
-   public static Pergunta[] pesquisarPalavras(Scanner leitor) throws Exception{
+   private static Pergunta[] pesquisarPalavras(Scanner leitor) throws Exception{
       System.out.println("Busque as perguntas por palavra chave separadas por ponto e vírgula\n" +
                          "Ex: politica;Brasil;eleições\n");
       System.out.print("Palavras chave: ");
@@ -353,7 +353,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * printPerguntaCompleta - exibe todas as informações de uma determinada pergunta de forma organizada e amigável ao usuário 
     * @param p a pergunta a ser exibida
     */
-   public static void printPerguntaCompleta(Pergunta p) throws Exception{
+   private static void printPerguntaCompleta(Pergunta p) throws Exception{
       System.out.println();
       System.out.println("==> " + p.pergunta + "\n");
       System.out.println("Criado em " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) +   
@@ -371,14 +371,14 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * printPerguntaResumida - exibe apenas o texto da pergunta e sua nota
     * @param p a pergunta a ser exibida
     */
-   public static void printPerguntaResumida(Pergunta p){
+   private static void printPerguntaResumida(Pergunta p){
       System.out.println(p.pergunta + "\nNota: " + p.nota + "\n");
    }
    /**
     * ordenarPerguntasDec - ordena um arranjo de Perguntas de forma decrescente
     * Observação: faz uso da sobrecarga/override da função "compareTo"
     */
-   public static void ordenarPerguntasDec(Pergunta[] perguntas){
+   private static void ordenarPerguntasDec(Pergunta[] perguntas){
       Arrays.sort(perguntas);
    }
    /**
@@ -386,14 +386,13 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * @param chaves uma string contendo chaves não tratadas
     * @return int[] o conjunto resposta (intersecção de todos os conjuntos) contendo as chaves desejadas.
     */
-   public static int[] interseccaoIds(String chaves) throws Exception{
+   private static int[] interseccaoIds(String chaves) throws Exception{
       String[] _chaves = tratarChaves(chaves);
       String buffer = _chaves[0].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
 
       int[] resp = listaChaves.read(buffer);
 
       for(int i = 1; i < _chaves.length; i++){
-         
          buffer = _chaves[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
          int[] arr = listaChaves.read(buffer);
          resp = interseccaoIds(resp, arr);
@@ -402,7 +401,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
       return resp;
    }
    /**
-    * interseccaoIds - método privado que faz a intersecção de dois conjuntos.
+    * interseccaoIds - faz a intersecção de dois conjuntos de inteiros.
     * @param a1 arranjo contendo IDs de perguntas
     * @param a2 arranjo contendo IDs de perguntas
     * @return resp arranjo contendo os IDs presents tanto em a1 quanto em a2
