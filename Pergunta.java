@@ -423,12 +423,6 @@ class Pergunta implements Registro, Comparable<Pergunta>{
    }
 
 
-   /**/
-   public static void pesquisarPergunta(Scanner leitor)throws Exception{
-      System.out.println("\nInsira as palavras chaves delimitadas pelo caracter ';':");
-      String chaves = leitor.nextLine();
-   }
-
    //atributos
    public int idUsuario; //chave de busca
    private int idPergunta; //dado

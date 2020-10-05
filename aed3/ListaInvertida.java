@@ -184,8 +184,15 @@ public class ListaInvertida {
     // Percorre toda a lista testando se já não existe
     // o dado associado a essa chave
     int[] lista = read(c);
-    if (Arrays.asList(lista).contains(d))
+
+    boolean existe = false;
+    for(int i = 0; i<lista.length && !existe; i++)
+      if(lista[i] == d)
+        existe = true;
+
+    if (existe){
       return false;
+    }
 
     String chave = "";
     long endereco = -1;

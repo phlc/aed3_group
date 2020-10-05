@@ -7,6 +7,10 @@ Pedro Henrique Lima Carvalho
 Tarcila Fernanda Resende da Silva
 */
 
+/*
+ * ATENÇÃO: CÓDIGO NÃO COMPILADO AINDA
+*/
+
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import aed3.*;
