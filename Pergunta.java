@@ -20,14 +20,19 @@ import aed3.ArvoreBMais_Int_Int;
 import aed3.ListaInvertida;
 import java.util.ArrayList;
 import java.text.Normalizer;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 
 /*
-Classe Usuario
+Classe Pergunta
 */
 
-class Pergunta implements Registro{
+class Pergunta implements Registro, Comparable<Pergunta>{
    //atributos estaticos
    public static Date data;
    public static SimpleDateFormat formatter;
@@ -127,7 +132,7 @@ class Pergunta implements Registro{
             }
 
             System.out.println("Pergunta incluída com sucesso!");
-            listaChaves.print();   
+            //listaChaves.print();   
          }else{
             System.out.println("Inclusão de pergunta cancelada.");
          }
@@ -280,6 +285,143 @@ class Pergunta implements Registro{
       }
       Menu.pause(leitor);
    }
+   /**
+    * consultarPerguntas - permite consulta ao banco de perguntas por meio de palavras chave
+    * @param leitor
+    * @return true, se alguma pergunta associada ao conjunto de palavras chave foi encontrada; false, caso contrario.
+    */
+   public static boolean consultarPerguntas(Scanner leitor) throws Exception{
+      boolean found = false;
+      Pergunta[] perguntas = pesquisarPalavras(leitor);
+      if(perguntas != null && perguntas.length > 0){
+         found = true;
+         for(int i = 0; i < perguntas.length; i++){
+            System.out.print(i + 1 + ". "); printPerguntaResumida(perguntas[i]);
+         }
+
+         System.out.print("Digite o número da pergunta que deseja visualizar: ");
+         int escolha = Menu.lerEscolha();
+
+         while(escolha <= 0 || escolha > perguntas.length){
+            System.out.println("Opção inválida.");
+            System.out.print("Digite o número da pergunta que deseja visualizar: ");
+            escolha = Menu.lerEscolha();
+         }
+
+         Menu.clear();
+         System.out.println(Menu.header);
+         System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
+         printPerguntaCompleta(perguntas[escolha-1]);
+
+         System.out.println("COMENTÁRIOS\n-----------\n");
+         //printComentarios
+         System.out.println("RESPOSTAS\n---------\n");
+         //printRespostas
+         System.out.println(Menu.consultPerg);
+      }else{
+         System.out.println("Não foram encontradas perguntas com as palavras chave especificadas.\n");
+      }
+      return found;
+   }
+
+   /**
+    * pesquisarPalavras - Método que permite a pesquisa de um conjunto de perguntas por meio de uma ou mais palavras-chave
+    * @param Scanner leitor
+    * @return Pergunta[] arranjo com as perguntas associadas ao conjunto de palavras-chave.
+   */
+   private static Pergunta[] pesquisarPalavras(Scanner leitor) throws Exception{
+      System.out.println("Busque as perguntas por palavra chave separadas por ponto e vírgula\n" +
+                         "Ex: politica;Brasil;eleições\n");
+      System.out.print("Palavras chave: ");
+      String buffer = leitor.nextLine();
+      Pergunta[] perguntas = null;
+      if(!buffer.equals("")){
+         int[] conj = interseccaoIds(buffer);
+         perguntas = new Pergunta[conj.length];
+         for(int i = 0; i < perguntas.length; i++){
+            perguntas[i] = arquivo.read(conj[i]);
+         }
+         ordenarPerguntasDec(perguntas);
+      }else{
+         System.out.println("Busca por perguntas cancelada. Alguns campos não foram preenchidos.");
+         Menu.pause(leitor);
+      }
+      return perguntas;
+   }
+
+   /**
+    * printPerguntaCompleta - exibe todas as informações de uma determinada pergunta de forma organizada e amigável ao usuário 
+    * @param p a pergunta a ser exibida
+    */
+   private static void printPerguntaCompleta(Pergunta p) throws Exception{
+      System.out.println();
+      System.out.println("==> " + p.pergunta + "\n");
+      System.out.println("Criado em " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) +   
+                                " às " + (new SimpleDateFormat("hh:mm")).format(p.criacao) + 
+                               " por " + (Acesso.arquivo.read(p.idUsuario)).nome);
+      System.out.print("Palavras chave: ");
+      int len = p.palavrasChave.length;
+      for(int i = 0; i < len; i++){
+         System.out.print("[" + p.palavrasChave[i] + "] ");
+      }
+      System.out.println("\nNota: " + p.nota + "\n");
+   }
+
+   /**
+    * printPerguntaResumida - exibe apenas o texto da pergunta e sua nota
+    * @param p a pergunta a ser exibida
+    */
+   private static void printPerguntaResumida(Pergunta p){
+      System.out.println(p.pergunta + "\nNota: " + p.nota + "\n");
+   }
+   /**
+    * ordenarPerguntasDec - ordena um arranjo de Perguntas de forma decrescente
+    * Observação: faz uso da sobrecarga/override da função "compareTo"
+    */
+   private static void ordenarPerguntasDec(Pergunta[] perguntas){
+      Arrays.sort(perguntas);
+   }
+   /**
+    * interseccaoIds - faz a intersecção dos conjuntos de ids encontrados em cada busca de um conjunto de chaves.
+    * @param chaves uma string contendo chaves não tratadas
+    * @return int[] o conjunto resposta (intersecção de todos os conjuntos) contendo as chaves desejadas.
+    */
+   private static int[] interseccaoIds(String chaves) throws Exception{
+      String[] _chaves = tratarChaves(chaves);
+      String buffer = _chaves[0].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+
+      int[] resp = listaChaves.read(buffer);
+
+      for(int i = 1; i < _chaves.length; i++){
+         buffer = _chaves[i].replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+         int[] arr = listaChaves.read(buffer);
+         resp = interseccaoIds(resp, arr);
+      }
+
+      return resp;
+   }
+   /**
+    * interseccaoIds - faz a intersecção de dois conjuntos de inteiros.
+    * @param a1 arranjo contendo IDs de perguntas
+    * @param a2 arranjo contendo IDs de perguntas
+    * @return resp arranjo contendo os IDs presents tanto em a1 quanto em a2
+    */
+   private static int[] interseccaoIds(int[] a1, int[] a2){
+      ArrayList<Integer> al = new ArrayList<>();
+      for(int i = 0; i < a1.length; i++){
+         for(int j = 0; j < a2.length; j++){
+            if(a1[i] == a2[j]){
+               al.add(a1[i]);
+               j = a2.length;
+            }
+         }
+      }
+      int[] resp = new int[al.size()];
+      for (int i = 0; i < al.size(); i++)
+        resp[i] = (int) al.get(i);
+      return resp;
+   }
+
 
    /**/
    public static void pesquisarPergunta(Scanner leitor)throws Exception{
@@ -295,6 +437,12 @@ class Pergunta implements Registro{
    public String pergunta;
    public boolean ativa;
    public String[] palavrasChave;
+
+   //Override do compareTo para ordenar de forma decrescente pela nota
+   @Override
+   public int compareTo(Pergunta a){
+         return this.nota > a.nota ? -1 : (this.nota == a.nota ? 0 : 1);
+   }
 
    //construtores
    public Pergunta(){
