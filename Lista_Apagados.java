@@ -37,8 +37,8 @@ public class Lista_Apagados {
    final private static short POS_APAGADOS = 0;   //Posicao do numero de nodes pagados
    final private static int MAX_APAGADOS = 4;     //Numero máximo de apagados antes da limpeza
    final private static long INICIO = 2;          //Posicao do endereco do primeiro node    
-   final private static String CONTROLE_A = "a_"; //início nome do arquivo para controle
-   final private static String CONTROLE_B = "b_"; //início nome do arquivo para controle
+   final private static String CONTROLE_A = "_a"; //início nome do arquivo para controle
+   final private static String CONTROLE_B = "_b"; //início nome do arquivo para controle
 
 //atributos
    private RandomAccessFile arquivo;
@@ -49,18 +49,18 @@ public class Lista_Apagados {
    public Lista_Apagados(String nome) throws Exception{
       //Verificar se já existe o arquivo
       if(new File(CONTROLE_A+nome).exists()){
-         this.nome_arquivo = CONTROLE_A+nome;
-         this.prox_nome = CONTROLE_B+nome;
+         this.nome_arquivo = nome+CONTROLE_A;
+         this.prox_nome = nome+CONTROLE_B;
          this.arquivo = new RandomAccessFile(nome_arquivo, "rws");
       }
       else if(new File(CONTROLE_B+nome).exists()){ 
-         this.nome_arquivo = CONTROLE_B+nome;
-         this.prox_nome = CONTROLE_A+nome;
+         this.nome_arquivo = nome+CONTROLE_B;
+         this.prox_nome = nome+CONTROLE_A;
          this.arquivo = new RandomAccessFile(nome_arquivo, "rws");     
       }
       else{
-         this.nome_arquivo = CONTROLE_A+nome;
-         this.prox_nome = CONTROLE_B+nome;
+         this.nome_arquivo = nome+CONTROLE_A;
+         this.prox_nome = nome+CONTROLE_B;
          this.arquivo = new RandomAccessFile(nome_arquivo, "rws");
          
          //escrever cabeçalho

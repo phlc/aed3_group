@@ -15,6 +15,7 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 import aed3.*;
 import java.util.Scanner;
+import java.io.File;
 
 
 public class Menu{
@@ -49,12 +50,18 @@ public class Menu{
    
    //inicializa atributos estáticos das classes Acesso e Pergunta
    private static void inicializar() throws Exception{
-      Acesso.arquivo = new CRUD<Usuario>(Usuario.class.getConstructor(), "usuarios.db");
-      Pergunta.arquivo = new CRUD<Pergunta>(Pergunta.class.getConstructor(), "perguntas.db");
+      
+      //Se não existir, cria um diretório DBs
+      File DBs = new File("DBs");
+      if(!DBs.exists())
+         DBs.mkdir();
+
+      Acesso.arquivo = new CRUD<Usuario>(Usuario.class.getConstructor(), "DBs/usuarios.db");
+      Pergunta.arquivo = new CRUD<Pergunta>(Pergunta.class.getConstructor(), "DBs/perguntas.db");
       Pergunta.data = new Date();
-      Pergunta.indice = new ArvoreBMais_Int_Int(5, "indicePerguntas.db");
+      Pergunta.indice = new ArvoreBMais_Int_Int(5, "DBs/indicePerguntas.db");
       Pergunta.formatter = new SimpleDateFormat();
-      Pergunta.listaChaves = new ListaInvertida(20, "palavrasChave.db", "palavrasBlocos.db");
+      Pergunta.listaChaves = new ListaInvertida(20, "DBs/palavrasChave.db", "DBs/palavrasBlocos.db");
       estado = 1;
    }
 
