@@ -23,7 +23,7 @@ public class Teste{
         
         for(int i = 0; i < quantAspas; i++){
             int primeiro = l.indexOf("\"");
-            aux = l.substring(primeiro, l.indexOf("\"", primeiro+1)+1);
+            aux = l.substring(primeiro, l.indexOf("\"", primeiro + 1) + 1);
             
             parte = l.split(aux);
             l = parte[1];
