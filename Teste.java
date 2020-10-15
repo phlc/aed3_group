@@ -15,33 +15,30 @@ public class Teste{
     public static void main(String[] args){
         Scanner leitor = new Scanner(System.in);
         String l = leitor.nextLine();
-        int quantAspas = contarAspas(l);
         ArrayList<String> resp = new ArrayList<String>();
 
-        String aux;
-        String[] parte;
-        
-        for(int i = 0; i < quantAspas; i++){
-            int primeiro = l.indexOf("\"");
-            aux = l.substring(primeiro, l.indexOf("\"", primeiro + 1) + 1);
-            
-            parte = l.split(aux);
-            l = parte[1];
+        int inicio = 0;    
+        int fim = 0; 
 
-            for( String j : parte[0].split(" ")){
-                if(!j.equals(""))
-                    resp.add(j);
+        while(fim<l.length()){
+            if(l.charAt(fim)==' '){
+                resp.add(l.substring(inicio, fim));
+                inicio = fim + 1;
             }
-
-            if(!aux.equals("\" \"") && !aux.equals("\"\"")){
-                resp.add(aux.replaceAll("\"",""));
+            else if(l.charAt(fim)=='\"'){
+               fim++;
+               inicio = fim;
+               while(l.charAt(fim)!='\"'){
+                  fim++;
+               }
+               resp.add(l.substring(inicio, fim));
+               inicio = fim + 1;
             }
+            resp.remove("");
+            fim++;
         }
-
-        for( String j : l.split(" "))
-            if(!j.equals(""))
-                resp.add(j);
-        
+        resp.add(l.substring(inicio, fim));
+        resp.remove("");
         System.out.println(resp);
     }
 }
