@@ -34,11 +34,10 @@ public class Teste{
                resp.add(l.substring(inicio, fim));
                inicio = fim + 1;
             }
-            resp.remove("");
             fim++;
         }
         resp.add(l.substring(inicio, fim));
-        resp.remove("");
+        resp.removeAll(Arrays.asList(""));
         System.out.println(resp);
     }
 }
