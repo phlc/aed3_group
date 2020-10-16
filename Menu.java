@@ -62,6 +62,8 @@ public class Menu{
       Pergunta.indice = new ArvoreBMais_Int_Int(5, "DBs/indicePerguntas.db");
       Pergunta.formatter = new SimpleDateFormat();
       Pergunta.listaChaves = new ListaInvertida(20, "DBs/palavrasChave.db", "DBs/palavrasBlocos.db");
+      Resposta.indiceRespUser = new ArvoreBMais_Int_Int(5, "DBs/indiceRespUser.db");
+      Resposta.indiceUserResp = new ArvoreBMais_Int_Int(5, "DBs/indiceUserResp.db");
       estado = 1;
    }
 

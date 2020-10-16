@@ -84,17 +84,58 @@ class Pergunta implements Registro, Comparable<Pergunta>{
       indice.create(userId, p.idPergunta);
    }
 
-   /* Método para tratar palavras chaves de pesquisa, retornando valores sem caracteres
-    * especiais e com letras minúsculas
-    * @param String chaves
+   /* Método auxilar tratar chaves para controle de aspas
+    * @param String x
+    * @return int paresDeAspas
+    */
+   public static int contarAspas(String x){
+      int resp = 0;
+      int tam = x.length();
+
+      for(int i = 0; i < tam; i++)
+         if(x.charAt(i) == '"')
+            resp++;
+
+      return resp/2;
+   }
+
+   /* Método para tratar palavras chaves de pesquisa separa palavras por ' ' e 
+    * expressoes por '"'
+    * @param String l
     * @return String[] arrayChaves
     */
-    private static String[] tratarChaves(String chaves){
-      //Decompor caracteres especiais
-      chaves = Normalizer.normalize(chaves, Normalizer.Form.NFD);
+   private static String[] tratarChaves(String l){
+      int cont = contarAspas(l); 
+      ArrayList<String> resp = new ArrayList<String>();
 
-      return chaves.split(";");
-    }
+      int inicio = 0;    
+      int fim = 0; 
+
+      while(fim<l.length()){
+         if(l.charAt(fim)==' '){
+            resp.add(l.substring(inicio, fim));
+            inicio = fim + 1;
+         } else if(l.charAt(fim)=='\"' && cont > 0){
+            resp.add(l.substring(inicio, fim));
+            fim++;
+            inicio = fim;
+            while(l.charAt(fim)!='\"'){
+               fim++;
+            }
+            resp.add(l.substring(inicio, fim));
+            inicio = fim + 1;
+            cont--;
+         }
+         fim++;
+      }
+      resp.add(l.substring(inicio, fim));
+      resp.removeAll(Arrays.asList(""));
+      
+      String[] resposta = new String[resp.size()];
+      for(int j=0; j<resp.size(); j++)
+         resposta[j] = resp.get(j);
+      return resposta;
+   }
 
    /*
     * novaPergunta - Método para usuário adicionar uma nova pergunta 
@@ -104,7 +145,8 @@ class Pergunta implements Registro, Comparable<Pergunta>{
       System.out.println("\nInsira a pergunta:");
       String buffer = leitor.nextLine();
 
-      System.out.println("\nInsira as palavras chaves delimitadas pelo caracter ';':");
+      System.out.println("\nInsira as palavras chaves delimitadas por espaço e");
+      System.out.println("\nexpressões por \"\". Ex: java \"Visual Studio Code\" Programação");
       String chaves = leitor.nextLine();
 
       if(!buffer.equals("") && !chaves.equals("")){
@@ -162,7 +204,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
             System.out.println("\nInsira a alteração da pergunta:");
             String buffer = leitor.nextLine();
 
-            System.out.println("Palavras chave atual: ");
+            System.out.println("Palavras chave atuais: ");
             for(int j = 0; j < p.palavrasChave.length; j++)
                System.out.print("[" + p.palavrasChave[j] + "] ");
 
@@ -330,8 +372,8 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * @return Pergunta[] arranjo com as perguntas associadas ao conjunto de palavras-chave.
    */
    private static Pergunta[] pesquisarPalavras(Scanner leitor) throws Exception{
-      System.out.println("Busque as perguntas por palavra chave separadas por ponto e vírgula\n" +
-                         "Ex: politica;Brasil;eleições\n");
+      System.out.println("\nInsira as palavras chaves delimitadas por espaço e");
+      System.out.println("\nexpressões por \"\". Ex: java \"Visual Studio Code\" Programação");
       System.out.print("Palavras chave: ");
       String buffer = leitor.nextLine();
       Pergunta[] perguntas = null;
@@ -538,7 +580,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
 
    /*
    chaveSecundaria - retorna a chave secundaria
-   No caso das perguntas, retorna null
+   No caso das perguntas, retorna idPergunta => CRUD não aceita "" ou null
    */
    public String chaveSecundaria(){
       return Integer.toString(this.idPergunta);

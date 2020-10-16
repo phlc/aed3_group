@@ -15,6 +15,7 @@ public class Teste{
     public static void main(String[] args){
         Scanner leitor = new Scanner(System.in);
         String l = leitor.nextLine();
+        int cont = contarAspas(l); 
         ArrayList<String> resp = new ArrayList<String>();
 
         int inicio = 0;    
@@ -25,7 +26,8 @@ public class Teste{
                 resp.add(l.substring(inicio, fim));
                 inicio = fim + 1;
             }
-            else if(l.charAt(fim)=='\"'){
+            else if(l.charAt(fim)=='\"' && cont > 0){
+               resp.add(l.substring(inicio, fim));
                fim++;
                inicio = fim;
                while(l.charAt(fim)!='\"'){
