@@ -16,85 +16,128 @@ import java.util.Scanner;
 import aed3.*;
 
  class Resposta implements Registro{
-    //Atributos estáticos
-    public static ArvoreBMais_Int_Int indiceRespUser;
-    public static ArvoreBMais_Int_Int indiceUserResp;
+   //Atributos estáticos
+   public static ArvoreBMais_Int_Int indicePergResp;
+   public static ArvoreBMais_Int_Int indiceUserResp;
+   public static CRUD<Resposta> arquivo;
 
-    //Métodos estáticos
+   //Métodos estáticos
+   /* Método para listar todas respostas de uma determinada pergunta
+    * @param int id da pergunta
+    */
+   public static void printRespostas(int id)throws Exception{
+      int[] ids = indicePergResp.read(id);
+      for(int i = 0; i < ids.length; i++){
+         System.out.println((i+1)+".\n");
+         Resposta r = arquivo.read(ids[i]);
+         System.out.println(r.resposta);
+         System.out.println("Nota:" + r.nota + "\n");
+      }
 
-    //Atributos 
-    public int idResposta;
-    public int idPergunta;
-    public int idUsuario;
-    public long criacao;
-    public short nota;
-    public String resposta;
-    public boolean ativa;
+   }
 
-    //Construtores
-    public Resposta(){
-        this(-1, -1, "");
-    }
+   /* Método para incluir resposta em uma determinada pergunta
+    * @para int id da pergunta, id do usuario Scanner leitor
+    * @return boolean true resposta inserida, false respoata não inserida
+    */
+   public static boolean novaResposta(int idPerg, int idUsuario, Scanner leitor)throws Exception{
+      System.out.println("Digite a resposta: ");
+      String resp = leitor.nextLine();
+      if(!resp.equals("")){
+         System.out.println("\nCONFIRME A CRIAÇÃO DA RESPOSTA: ");
+         System.out.println(resp);
+         System.out.print("(SIM(S) NÃO(N)): ");
+         String confirmacao = leitor.nextLine();
+         confirmacao = confirmacao.toUpperCase();
+         if(confirmacao.contains("S")){
+            Resposta nova = new Resposta(idPerg, idUsuario, resp);
+            arquivo.create(nova);
+            indicePergResp.create(idPerg, nova.getID());
+            indiceUserResp.create(idUsuario, nova.getID());
+            return true;
+         }else{
+            System.out.println("Inclusão cancelada.");
+            return false;
+         }
+      }else{
+         System.out.println("Reposta inválida.");
+         return false;
+      }
+   }
+    
+   //Atributos 
+   public int idResposta;
+   public int idPergunta;
+   public int idUsuario;
+   public long criacao;
+   public short nota;
+   public String resposta;
+   public boolean ativa;
 
-    public Resposta(int idPergunta, int idUsuario, String resposta){
-        this(-1, idPergunta, idUsuario, System.currentTimeMillis(), (short)0, resposta, true);
-    }
+   //Construtores
+   public Resposta(){
+      this(-1, -1, "");
+   }
 
-    public Resposta(int idResposta, int idPergunta, int idUsuario, long criacao, 
-                    short nota, String resposta, boolean ativa){
-        this.idResposta = idResposta;
-        this.idPergunta = idPergunta;
-        this.idUsuario = idUsuario;
-        this.criacao = criacao;
-        this.nota = nota;
-        this.resposta =resposta;
-        this.ativa = ativa;
-    }
+   public Resposta(int idPergunta, int idUsuario, String resposta){
+      this(-1, idPergunta, idUsuario, System.currentTimeMillis(), (short)0, resposta, true);
+   }
 
-    //metodos
+   public Resposta(int idResposta, int idPergunta, int idUsuario, long criacao, 
+                  short nota, String resposta, boolean ativa){
+      this.idResposta = idResposta;
+      this.idPergunta = idPergunta;
+      this.idUsuario = idUsuario;
+      this.criacao = criacao;
+      this.nota = nota;
+      this.resposta =resposta;
+      this.ativa = ativa;
+   }
 
-    /*
-     * getID - retorna o ID de um objeto
-     * @return int id
-     */
-    public int getID(){
-       return(this.idPergunta);
-    }
+   //metodos
+
+   /*
+    * getID - retorna o ID de um objeto
+    * @return int id
+    */
+   public int getID(){
+      return(this.idPergunta);
+   }
    
-    /*
-     * setID - atribui um ID para um objeto
-     * @param int n
-     */
-    public void setID(int n){
-       this.idPergunta = n;
-    }
+   /*
+    * setID - atribui um ID para um objeto
+    * @param int n
+    */
+   public void setID(int n){
+     this.idPergunta = n;
+   }
     
-    /*
-     * toByteArray - retorna o conteudo do objeto com byte[]
-     * @return byte[] ba
-     */
-    public byte[] toByteArray() throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
+   /*
+    * toByteArray - retorna o conteudo do objeto com byte[]
+    * @return byte[] ba
+    */
+   public byte[] toByteArray() throws IOException{
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      DataOutputStream dos = new DataOutputStream(baos);
         
-        dos.writeInt(this.idResposta);
-        dos.writeInt(this.idPergunta);
-        dos.writeInt(this.idUsuario);
-        dos.writeLong(this.criacao);
-        dos.writeShort(this.nota);
-        dos.writeUTF(this.resposta);
-        dos.writeBoolean(this.ativa);
+      dos.writeInt(this.idResposta);
+      dos.writeInt(this.idPergunta);
+      dos.writeInt(this.idUsuario);
+      dos.writeLong(this.criacao);
+      dos.writeShort(this.nota);
+      dos.writeUTF(this.resposta);
+      dos.writeBoolean(this.ativa);
 
-        return(baos.toByteArray());
-    } 
+      return(baos.toByteArray());
+   } 
     
 
 
-    /*
-     * fromByteArray - preenche o objeto a partir de um byte[]
-     *  @param byte[] ba
-     */
-    public void fromByteArray(byte[] ba) throws IOException{
+   /*
+    * fromByteArray - preenche o objeto a partir de um byte[]
+    *  @param byte[] ba
+    */
+   public void fromByteArray(byte[] ba) throws IOException{
       ByteArrayInputStream bais = new ByteArrayInputStream(ba);
       DataInputStream dis = new DataInputStream(bais);
       
@@ -106,15 +149,15 @@ import aed3.*;
       this.resposta = dis.readUTF();
       this.ativa = dis.readBoolean();
      
-    }
+   }
     
-    /*
-     * toString - forma uma String a partir dos dados do objeto
-     * Este método exibe dados relevantes para o funcionamento interno do sistema e, portanto, não deve ser
-     * usado para exibição de dados ao usuário
-     * @return String
-     */
-    public String toString(){
+   /*
+    * toString - forma uma String a partir dos dados do objeto
+    * Este método exibe dados relevantes para o funcionamento interno do sistema e, portanto, não deve ser
+    * usado para exibição de dados ao usuário
+    * @return String
+    */
+   public String toString(){
       String resp = "\nID Resp: " + this.idResposta;
       resp = resp + "\nID Perg: " + this.idPergunta;
       resp = resp + "\nID Usua: " + this.idUsuario;
@@ -123,13 +166,13 @@ import aed3.*;
       resp = resp + "\nResposta: " + this.resposta;
       resp = resp + "\nAtiva: " + this.ativa;
       return(resp);
-    }
+   }
 
-    /*
-     * chaveSecundaria - retorna a chave secundaria
-     * No caso das respostas, retorna idPergunta => CRUD não aceita "" ou null
-     */
-    public String chaveSecundaria(){
-       return Integer.toString(this.idResposta);
-    }
- }
+   /*
+    * chaveSecundaria - retorna a chave secundaria
+    * No caso das respostas, retorna idPergunta => CRUD não aceita "" ou null
+    */
+   public String chaveSecundaria(){
+      return Integer.toString(this.idResposta);
+   }
+}

@@ -330,13 +330,12 @@ class Pergunta implements Registro, Comparable<Pergunta>{
    /**
     * consultarPerguntas - permite consulta ao banco de perguntas por meio de palavras chave
     * @param leitor
-    * @return true, se alguma pergunta associada ao conjunto de palavras chave foi encontrada; false, caso contrario.
+    * @return int (id da pergunta)> 0 , se alguma pergunta foi selecionada; -1, caso contrario.
     */
-   public static boolean consultarPerguntas(Scanner leitor) throws Exception{
-      boolean found = false;
+   public static int consultarPerguntas(Scanner leitor) throws Exception{
+      int pergunta = -1;
       Pergunta[] perguntas = pesquisarPalavras(leitor);
       if(perguntas != null && perguntas.length > 0){
-         found = true;
          for(int i = 0; i < perguntas.length; i++){
             System.out.print(i + 1 + ". "); printPerguntaResumida(perguntas[i]);
          }
@@ -349,21 +348,21 @@ class Pergunta implements Registro, Comparable<Pergunta>{
             System.out.print("Digite o número da pergunta que deseja visualizar: ");
             escolha = Menu.lerEscolha();
          }
-
+         pergunta = perguntas[escolha-1].getID();
          Menu.clear();
          System.out.println(Menu.header);
          System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
          printPerguntaCompleta(perguntas[escolha-1]);
-
          System.out.println("COMENTÁRIOS\n-----------\n");
-         //printComentarios
+         //Resposta.printComentarios(pergunta);
          System.out.println("RESPOSTAS\n---------\n");
-         //printRespostas
+         Resposta.printRespostas(pergunta);
          System.out.println(Menu.consultPerg);
+         
       }else{
          System.out.println("Não foram encontradas perguntas com as palavras chave especificadas.\n");
       }
-      return found;
+      return pergunta;
    }
 
    /**
@@ -395,7 +394,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * printPerguntaCompleta - exibe todas as informações de uma determinada pergunta de forma organizada e amigável ao usuário 
     * @param p a pergunta a ser exibida
     */
-   private static void printPerguntaCompleta(Pergunta p) throws Exception{
+   public static void printPerguntaCompleta(Pergunta p) throws Exception{
       System.out.println();
       System.out.println("==> " + p.pergunta + "\n");
       System.out.println("Criado em " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) +   

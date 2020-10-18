@@ -39,11 +39,13 @@ public class Menu{
                                        + "\nOpção: ";
    
    public static String consultPerg = "\n1) Responder\n" + "2) Comentar\n" + "3) Avaliar\n" + "\n0) Retornar\n" + "\nOpção: ";
-
+   public static String menuResp = "1) Listar suas respostas\n2) Incluir uma resposta\n3) Alterar uma resposta\n4)"
+                                   + " Arquivar uma resposta\n0) Retornar ao menu anterior\n\nOpção: _";
    public static String mensagemErro = "\nERRO\n" + "\nDesculpe, ocorreu um" + "erro inesperado\n" 
                                        + "Tente novamente mais tarde";
 
    private static Usuario online = null ;
+   private static int perg = -1;
    private static int notificacoes; //seria isso um dado do usuário armazenado no arquivo? Se sim, criar novo campo no BD
    private static Scanner leitor = new Scanner(System.in);
    private static byte estado;
@@ -58,11 +60,12 @@ public class Menu{
 
       Acesso.arquivo = new CRUD<Usuario>(Usuario.class.getConstructor(), "DBs/usuarios.db");
       Pergunta.arquivo = new CRUD<Pergunta>(Pergunta.class.getConstructor(), "DBs/perguntas.db");
+      Resposta.arquivo = new CRUD<Resposta>(Resposta.class.getConstructor(), "DBs/respostas.db");
       Pergunta.data = new Date();
       Pergunta.indice = new ArvoreBMais_Int_Int(5, "DBs/indicePerguntas.db");
       Pergunta.formatter = new SimpleDateFormat();
       Pergunta.listaChaves = new ListaInvertida(20, "DBs/palavrasChave.db", "DBs/palavrasBlocos.db");
-      Resposta.indiceRespUser = new ArvoreBMais_Int_Int(5, "DBs/indiceRespUser.db");
+      Resposta.indicePergResp = new ArvoreBMais_Int_Int(5, "DBs/indicePergResp.db");
       Resposta.indiceUserResp = new ArvoreBMais_Int_Int(5, "DBs/indiceUserResp.db");
       estado = 1;
    }
@@ -285,25 +288,31 @@ public class Menu{
    }
 
    public static void menuConsultarPerg(){
-      clear();
+      //clear();
       System.out.println(header);
       System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
-      boolean permitirEscolha = false;
+      perg = -1;
       try{
-         permitirEscolha = Pergunta.consultarPerguntas(leitor);
+         perg = Pergunta.consultarPerguntas(leitor);
       }catch(Exception e){
          telaErro();
       }
       int escolha;
+      
 
-      if(permitirEscolha) escolha = lerEscolha(); else{ escolha = 0; pause(leitor); }
+      if(perg > -1){
+         escolha = lerEscolha(); 
+      } else{
+         escolha = 0; 
+         pause(leitor);
+      } 
 
       switch(escolha){
          case 0:
             estado = 2;
             break;
          case 1:
-            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
+            estado = 5;
             pause(leitor);
             break;
          case 2:
@@ -312,6 +321,49 @@ public class Menu{
             break;
          case 3:
             System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
+            pause(leitor);
+            break;
+         default:
+            System.out.println("\nEscolha inválida");
+            pause(leitor);
+      }
+   }
+
+   public static void menuResponder(){
+      clear();
+      System.out.println(header);
+      System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS > RESPONDER\n");
+
+      try{
+         Pergunta.printPerguntaCompleta(Pergunta.arquivo.read(perg));
+         System.out.println(menuResp);
+      }catch(Exception e){
+         estado = 3;
+         telaErro();
+      }
+      
+
+      int escolha = lerEscolha(); 
+
+      switch(escolha){
+         case 0:
+            estado = 3;
+            break;
+         case 1: 
+            try{
+               
+               pause(leitor);
+            }catch(Exception e){
+               telaErro();
+            }
+            break;
+         case 2:
+            try{
+               if(Resposta.novaResposta(perg, online.getID(), leitor))
+                  estado = 3;
+            }catch(Exception e){
+               telaErro();
+            }
             pause(leitor);
             break;
          default:
@@ -342,6 +394,9 @@ public class Menu{
                   break;
                case 4:
                   menuConsultarPerg();
+                  break;
+               case 5:
+                  menuResponder();
                   break;
                default:
                   telaErro();

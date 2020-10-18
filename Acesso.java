@@ -95,6 +95,7 @@ public class Acesso{
             System.out.println();
             System.out.println("CASO TENHA ESQUECIDO A SENHA SELECIONE OPÇÃO [3]");
             Menu.pause(leitor);
+            user = null;
          }
       }
       return user; 
