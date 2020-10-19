@@ -155,7 +155,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
          System.out.println("\nCONFIRME A CRIAÇÃO DA PERGUNTA: ");
          System.out.println("\""+buffer+"\"\n");
          System.out.println("\nQUE CONTÉM AS PALAVRAS CHAVE: \"");
-         System.out.println("\""+chaves+"\"");
+         System.out.println(chaves);
 
          System.out.print("(SIM(S) NÃO(N)): ");
          String confirmacao = leitor.nextLine();

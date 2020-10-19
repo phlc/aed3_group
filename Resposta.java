@@ -22,6 +22,23 @@ import aed3.*;
    public static CRUD<Resposta> arquivo;
 
    //Métodos estáticos
+
+   /* Metodo para listar respostas do usuário logado na pergunta selecionada
+    * @param int id do usuario online, id da pergunta selecionada 
+    */
+   public static void printRespUsuario(int idUser, int idPerg)throws Exception{
+      int[] ids = indicePergResp.read(idPerg);
+      int cont = 0;
+      for (int i : ids){
+         Resposta p = arquivo.read(i);
+         if(p.idUsuario == idUser){
+            System.out.println((++cont)+".\n");
+            System.out.println(p.resposta);
+            System.out.println("Nota:" + p.nota + "\n");
+         }
+      } 
+   }
+
    /* Método para listar todas respostas de uma determinada pergunta
     * @param int id da pergunta
     */
@@ -38,7 +55,7 @@ import aed3.*;
 
    /* Método para incluir resposta em uma determinada pergunta
     * @para int id da pergunta, id do usuario Scanner leitor
-    * @return boolean true resposta inserida, false respoata não inserida
+    * @return boolean true resposta inserida, false resposta não inserida
     */
    public static boolean novaResposta(int idPerg, int idUsuario, Scanner leitor)throws Exception{
       System.out.println("Digite a resposta: ");
@@ -64,9 +81,111 @@ import aed3.*;
          return false;
       }
    }
+  
+   /* Método para alterar resposta em uma determinada pergunta pelo usuario logado
+    * @para int id da pergunta, id do usuario Scanner leitor
+    * @return boolean true resposta alterada, false resposta não alterada
+    */
+   public static boolean alterarResp(int idPerg, int idUser, Scanner leitor)throws Exception{
+      int[] ids = indicePergResp.read(idPerg);
+      int cont = 0;
+
+      for (int i : ids){
+         Resposta p = arquivo.read(i);
+         if(p.idUsuario == idUser){
+            System.out.println((++cont)+".\n");
+            System.out.println(p.resposta);
+            System.out.println("Nota:" + p.nota + "\n");
+         }
+      } 
+
+      System.out.println("Qual resposta deseja alterar?");
+      int r = Menu.lerEscolha();
+      if(r > 0 && r <= ids.length){
+         Resposta p = arquivo.read(ids[r-1]);
+
+         System.out.println("Resposta escolhida para alteração: ");
+         System.out.println(p.resposta);
+         System.out.println("Nota:" + p.nota + "\n");
+
+         System.out.println("Digite a nova resposta: ");
+         String nova = leitor.nextLine();
+
+         if(!nova.equals("")){
+            System.out.println("\nCONFIRME A ALTERAÇÃO DA RESPOSTA: ");
+            System.out.println(nova);
+            System.out.print("(SIM(S) NÃO(N)): ");
+            String confirmacao = leitor.nextLine();
+            confirmacao = confirmacao.toUpperCase();
+
+            if(confirmacao.contains("S")){
+               p.resposta = nova;
+               arquivo.update(p);
+               System.out.println("Resposta alterada com sucesso!");
+               return true;
+            }else{ 
+               System.out.println("Alteração cancelada.");
+               return false;
+            }
+            
+         }else{
+            System.out.println("Campo deixado em branco, alteração cancelada.");
+            return false;
+         }
+      }else{
+         System.out.println("Escolha inválida.");
+         return false;
+      }
+   }
+
+   public static boolean arquivarPerg(int idPerg, int idUser, Scanner leitor)throws Exception{
+      int[] ids = indicePergResp.read(idPerg);
+      int cont = 0;
+
+      for (int i : ids){
+         Resposta p = arquivo.read(i);
+         if(p.idUsuario == idUser){
+            System.out.println((++cont)+".\n");
+            System.out.println(p.resposta);
+            System.out.println("Nota:" + p.nota + "\n");
+         }
+      }
+
+      System.out.println("Qual resposta deseja arquivar?");
+      int r = Menu.lerEscolha();
+      if(r > 0 && r <= ids.length){
+         Resposta p = arquivo.read(ids[r-1]);
+            
+         System.out.println("Resposta escolhida para arquivar: ");
+         System.out.println(p.resposta);
+         System.out.println("Nota:" + p.nota + "\n");
+            
+         System.out.println("\nCONFIRME O ARQUIVAMENTO DA RESPOSTA: ");
+         System.out.print("(SIM(S) NÃO(N)): ");
+         String confirmacao = leitor.nextLine();
+         confirmacao = confirmacao.toUpperCase();
+
+         if(confirmacao.contains("S")){
+            p.ativa = false;
+            arquivo.update(p);
+            indicePergResp.delete(idPerg, p.idResposta);
+            indiceUserResp.delete(idUser, p.idResposta);
+            System.out.println("Resposta arqivada com sucesso!");
+            return true;
+         }else{ 
+            System.out.println("Resposta não arquivada.");
+            return false;
+         }
+
+      }else{
+         System.out.println("Escolha inválida.");
+         return false;
+      }
+
+   }
     
    //Atributos 
-   public int idResposta;
+   private int idResposta;
    public int idPergunta;
    public int idUsuario;
    public long criacao;
@@ -101,7 +220,7 @@ import aed3.*;
     * @return int id
     */
    public int getID(){
-      return(this.idPergunta);
+      return(this.idResposta);
    }
    
    /*
@@ -109,7 +228,7 @@ import aed3.*;
     * @param int n
     */
    public void setID(int n){
-     this.idPergunta = n;
+     this.idResposta = n;
    }
     
    /*

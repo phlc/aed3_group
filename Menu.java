@@ -288,7 +288,7 @@ public class Menu{
    }
 
    public static void menuConsultarPerg(){
-      //clear();
+      clear();
       System.out.println(header);
       System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
       perg = -1;
@@ -313,7 +313,6 @@ public class Menu{
             break;
          case 1:
             estado = 5;
-            pause(leitor);
             break;
          case 2:
             System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
@@ -347,11 +346,11 @@ public class Menu{
 
       switch(escolha){
          case 0:
-            estado = 3;
+            estado = 2;
             break;
          case 1: 
             try{
-               
+               Resposta.printRespUsuario(online.getID(), perg);
                pause(leitor);
             }catch(Exception e){
                telaErro();
@@ -359,12 +358,27 @@ public class Menu{
             break;
          case 2:
             try{
-               if(Resposta.novaResposta(perg, online.getID(), leitor))
-                  estado = 3;
+               Resposta.novaResposta(perg, online.getID(), leitor);
             }catch(Exception e){
                telaErro();
             }
             pause(leitor);
+            break;
+         case 3:
+            try{
+               Resposta.alterarResp(perg, online.getID(), leitor);
+               pause(leitor);
+            }catch(Exception e){
+               telaErro();
+            }
+            break;
+         case 4:
+            try{
+               Resposta.arquivarPerg(perg, online.getID(), leitor);
+               pause(leitor);
+            }catch(Exception e){
+               telaErro();
+            }
             break;
          default:
             System.out.println("\nEscolha inválida");
