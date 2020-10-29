@@ -45,7 +45,7 @@ public class Menu{
                                        + "Tente novamente mais tarde";
 
    private static Usuario online = null ;
-   private static int perg = -1;
+   private static Pergunta perg = null;
    private static int notificacoes; //seria isso um dado do usuário armazenado no arquivo? Se sim, criar novo campo no BD
    private static Scanner leitor = new Scanner(System.in);
    private static byte estado;
@@ -61,6 +61,7 @@ public class Menu{
       Acesso.arquivo = new CRUD<Usuario>(Usuario.class.getConstructor(), "DBs/usuarios.db");
       Pergunta.arquivo = new CRUD<Pergunta>(Pergunta.class.getConstructor(), "DBs/perguntas.db");
       Resposta.arquivo = new CRUD<Resposta>(Resposta.class.getConstructor(), "DBs/respostas.db");
+      Voto.arquivo = new CRUD<Voto>(Voto.class.getConstructor(), "DBs/votos.db");
       Pergunta.data = new Date();
       Pergunta.indice = new ArvoreBMais_Int_Int(5, "DBs/indicePerguntas.db");
       Pergunta.formatter = new SimpleDateFormat();
@@ -291,7 +292,7 @@ public class Menu{
       clear();
       System.out.println(header);
       System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
-      perg = -1;
+      perg = null;
       try{
          perg = Pergunta.consultarPerguntas(leitor);
       }catch(Exception e){
@@ -300,7 +301,7 @@ public class Menu{
       int escolha;
       
 
-      if(perg > -1){
+      if(perg != null){
          escolha = lerEscolha(); 
       } else{
          escolha = 0; 
@@ -319,8 +320,8 @@ public class Menu{
             pause(leitor);
             break;
          case 3:
-            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
-            pause(leitor);
+            //avaliacao aqui
+            estado = 6;
             break;
          default:
             System.out.println("\nEscolha inválida");
@@ -334,7 +335,7 @@ public class Menu{
       System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS > RESPONDER\n");
 
       try{
-         Pergunta.printPerguntaCompleta(Pergunta.arquivo.read(perg));
+         Pergunta.printPerguntaCompleta(Pergunta.arquivo.read(perg.getID()));
          System.out.println(menuResp);
       }catch(Exception e){
          estado = 3;
@@ -350,7 +351,7 @@ public class Menu{
             break;
          case 1: 
             try{
-               Resposta.printRespUsuario(online.getID(), perg);
+               Resposta.printRespUsuario(online.getID(), perg.getID());
                pause(leitor);
             }catch(Exception e){
                telaErro();
@@ -358,7 +359,7 @@ public class Menu{
             break;
          case 2:
             try{
-               Resposta.novaResposta(perg, online.getID(), leitor);
+               Resposta.novaResposta(perg.getID(), online.getID(), leitor);
             }catch(Exception e){
                telaErro();
             }
@@ -366,7 +367,7 @@ public class Menu{
             break;
          case 3:
             try{
-               Resposta.alterarResp(perg, online.getID(), leitor);
+               Resposta.alterarResp(perg.getID(), online.getID(), leitor);
                pause(leitor);
             }catch(Exception e){
                telaErro();
@@ -374,8 +375,45 @@ public class Menu{
             break;
          case 4:
             try{
-               Resposta.arquivarPerg(perg, online.getID(), leitor);
+               Resposta.arquivarPerg(perg.getID(), online.getID(), leitor);
                pause(leitor);
+            }catch(Exception e){
+               telaErro();
+            }
+            break;
+         default:
+            System.out.println("\nEscolha inválida");
+            pause(leitor);
+      }
+   }
+
+   public static void menuVotar(){
+      clear();
+      System.out.println(header);
+      System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS > VOTAR\n");
+      int escolha = -1;
+      try{
+         escolha = Voto.escolherPergOuResp(leitor, perg);
+      }catch(Exception e){
+         telaErro();
+      }
+
+      switch(escolha){
+         case 0:
+            estado = 4;
+            break;
+         case 1:
+            try{
+               Voto.votarPergunta(online.getID(), leitor, perg);
+               estado = 4;
+            }catch(Exception e){
+               telaErro();
+            }
+            break;
+         case 2:
+            try{
+               Voto.votarResposta(online.getID(), leitor, perg);
+               estado = 4;
             }catch(Exception e){
                telaErro();
             }
@@ -411,6 +449,9 @@ public class Menu{
                   break;
                case 5:
                   menuResponder();
+                  break;
+               case 6:
+                  menuVotar();
                   break;
                default:
                   telaErro();

@@ -332,8 +332,8 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * @param leitor
     * @return int (id da pergunta)> 0 , se alguma pergunta foi selecionada; -1, caso contrario.
     */
-   public static int consultarPerguntas(Scanner leitor) throws Exception{
-      int pergunta = -1;
+   public static Pergunta consultarPerguntas(Scanner leitor) throws Exception{
+      Pergunta pergunta = null;
       Pergunta[] perguntas = pesquisarPalavras(leitor);
       if(perguntas != null && perguntas.length > 0){
          for(int i = 0; i < perguntas.length; i++){
@@ -348,7 +348,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
             System.out.print("Digite o número da pergunta que deseja visualizar: ");
             escolha = Menu.lerEscolha();
          }
-         pergunta = perguntas[escolha-1].getID();
+         pergunta = perguntas[escolha-1];
          Menu.clear();
          System.out.println(Menu.header);
          System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
@@ -356,7 +356,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
          System.out.println("COMENTÁRIOS\n-----------\n");
          //Resposta.printComentarios(pergunta);
          System.out.println("RESPOSTAS\n---------\n");
-         Resposta.printRespostas(pergunta);
+         Resposta.printRespostas(pergunta.getID());
          System.out.println(Menu.consultPerg);
          
       }else{
@@ -412,7 +412,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * printPerguntaResumida - exibe apenas o texto da pergunta e sua nota
     * @param p a pergunta a ser exibida
     */
-   private static void printPerguntaResumida(Pergunta p){
+   public static void printPerguntaResumida(Pergunta p){
       System.out.println(p.pergunta + "\nNota: " + p.nota + "\n");
    }
    /**
