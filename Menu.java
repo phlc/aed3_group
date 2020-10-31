@@ -306,27 +306,8 @@ public class Menu{
       } else{
          escolha = 0; 
          pause(leitor);
-      } 
-
-      switch(escolha){
-         case 0:
-            estado = 2;
-            break;
-         case 1:
-            estado = 5;
-            break;
-         case 2:
-            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
-            pause(leitor);
-            break;
-         case 3:
-            //avaliacao aqui
-            estado = 6;
-            break;
-         default:
-            System.out.println("\nEscolha inválida");
-            pause(leitor);
       }
+      estado = Pergunta.escolhaMenuPergunta(escolha, leitor);
    }
 
    public static void menuResponder(){
@@ -400,12 +381,12 @@ public class Menu{
 
       switch(escolha){
          case 0:
-            estado = 4;
+            estado = 7;
             break;
          case 1:
             try{
                Voto.votarPergunta(online.getID(), leitor, perg);
-               estado = 4;
+               estado = 7;
             }catch(Exception e){
                telaErro();
             }
@@ -413,7 +394,7 @@ public class Menu{
          case 2:
             try{
                Voto.votarResposta(online.getID(), leitor, perg);
-               estado = 4;
+               estado = 7;
             }catch(Exception e){
                telaErro();
             }
@@ -452,6 +433,15 @@ public class Menu{
                   break;
                case 6:
                   menuVotar();
+                  break;
+               case 7: //estado para visualizar pergunta selecionada 
+                  try{
+                     Pergunta.exibirMenuPergunta(perg);
+                  }catch(Exception e){
+                     telaErro();
+                  }
+                  int escolha = lerEscolha();
+                  estado = Pergunta.escolhaMenuPergunta(escolha, leitor);
                   break;
                default:
                   telaErro();

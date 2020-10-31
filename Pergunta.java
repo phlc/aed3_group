@@ -330,7 +330,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
    /**
     * consultarPerguntas - permite consulta ao banco de perguntas por meio de palavras chave
     * @param leitor
-    * @return int (id da pergunta)> 0 , se alguma pergunta foi selecionada; -1, caso contrario.
+    * @return Pergunta pergunta != null , se alguma pergunta foi selecionada; null, caso contrario.
     */
    public static Pergunta consultarPerguntas(Scanner leitor) throws Exception{
       Pergunta pergunta = null;
@@ -349,6 +349,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
             escolha = Menu.lerEscolha();
          }
          pergunta = perguntas[escolha-1];
+         /*
          Menu.clear();
          System.out.println(Menu.header);
          System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
@@ -358,11 +359,55 @@ class Pergunta implements Registro, Comparable<Pergunta>{
          System.out.println("RESPOSTAS\n---------\n");
          Resposta.printRespostas(pergunta.getID());
          System.out.println(Menu.consultPerg);
-         
+         */
+         exibirMenuPergunta(pergunta);
       }else{
          System.out.println("Não foram encontradas perguntas com as palavras chave especificadas.\n");
       }
       return pergunta;
+   }
+   /**
+    * exibirMenuPergunta - exibe a pergunta completa, com respostas, comentários e opções de interação (responder, comentar e avaliar)
+    * @param p pergunta a ser exibida
+    */
+   public static void exibirMenuPergunta(Pergunta p) throws Exception{
+      Menu.clear();
+      System.out.println(Menu.header);
+      System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
+      printPerguntaCompleta(p);
+      System.out.println("COMENTÁRIOS\n-----------\n");
+      //Resposta.printComentarios(pergunta);
+      System.out.println("RESPOSTAS\n---------\n");
+      Resposta.printRespostas(p.getID());
+      System.out.print(Menu.consultPerg);
+   }
+
+   /**
+    * escolhaMenuPergunta - permite a escolha entre responder, comentar ou avaliar uma pergunta ou respostas à mesma pergunta.
+    * @param escolha escolha do usuário, obtida na função main da classe Menu
+    * @param leitor leitor da classe Menu
+    * @return estado atualizado do sistema
+    */
+   public static byte escolhaMenuPergunta(int escolha, Scanner leitor){
+      byte estado = 2;
+      switch(escolha){
+         case 0: //voltar
+            break;
+         case 1: //responder
+            estado = 5;
+            break;
+         case 2: //comentar
+            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
+            Menu.pause(leitor);
+            break;
+         case 3: //avaliar
+            estado = 6;
+            break;
+         default:
+            System.out.println("\nEscolha inválida");
+            Menu.pause(leitor);
+      }
+      return estado;
    }
 
    /**
