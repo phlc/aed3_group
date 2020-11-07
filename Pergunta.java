@@ -349,17 +349,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
             escolha = Menu.lerEscolha();
          }
          pergunta = perguntas[escolha-1];
-         /*
-         Menu.clear();
-         System.out.println(Menu.header);
-         System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
-         printPerguntaCompleta(perguntas[escolha-1]);
-         System.out.println("COMENTÁRIOS\n-----------\n");
-         //Resposta.printComentarios(pergunta);
-         System.out.println("RESPOSTAS\n---------\n");
-         Resposta.printRespostas(pergunta.getID());
-         System.out.println(Menu.consultPerg);
-         */
+         
          exibirMenuPergunta(pergunta);
       }else{
          System.out.println("Não foram encontradas perguntas com as palavras chave especificadas.\n");
@@ -376,7 +366,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
       System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS\n");
       printPerguntaCompleta(p);
       System.out.println("COMENTÁRIOS\n-----------\n");
-      //Resposta.printComentarios(pergunta);
+      Comentario.printComentariosPerg(p.getID());
       System.out.println("RESPOSTAS\n---------\n");
       Resposta.printRespostas(p.getID());
       System.out.print(Menu.consultPerg);
@@ -397,8 +387,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
             estado = 5;
             break;
          case 2: //comentar
-            System.out.println("Estamos trabalhando nisso...\nAguarde novidades");
-            Menu.pause(leitor);
+            estado = 8;
             break;
          case 3: //avaliar
             estado = 6;
