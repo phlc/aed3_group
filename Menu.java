@@ -428,14 +428,14 @@ public class Menu{
                telaErro();
             }
             break;
-        /* case 2:
+         case 2:
             try{
-               Voto.votarResposta(online.getID(), leitor, perg);
+               Comentario.comentarResp(online.getID(), leitor, perg);
                estado = 7;
             }catch(Exception e){
                telaErro();
             }
-            break;*/
+            break;
          default:
             System.out.println("\nEscolha inválida");
             pause(leitor);

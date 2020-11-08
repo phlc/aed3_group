@@ -105,6 +105,7 @@ class Pergunta implements Registro, Comparable<Pergunta>{
     * @return String[] arrayChaves
     */
    private static String[] tratarChaves(String l){
+      l = Normalizer.normalize(l, Normalizer.Form.NFD);
       int cont = contarAspas(l); 
       ArrayList<String> resp = new ArrayList<String>();
 

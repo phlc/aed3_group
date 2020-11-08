@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.util.Scanner;
 import aed3.*;
 
+import java.text.SimpleDateFormat;
+
+
  class Resposta implements Registro{
    //Atributos estáticos
    public static ArvoreBMais_Int_Int indicePergResp;
@@ -46,11 +49,14 @@ import aed3.*;
       int[] ids = indicePergResp.read(id);
       for(int i = 0; i < ids.length; i++){
          System.out.println((i+1)+".\n");
-         Resposta r = arquivo.read(ids[i]);
-         System.out.println(r.resposta);
-         System.out.println("Nota:" + r.nota + "\n");
+         Resposta p = arquivo.read(ids[i]);
+         System.out.println(p.resposta);
+         System.out.println("Nota:" + p.nota + "\n");
+         System.out.println("Respondido em: " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) +   
+                     " às " + (new SimpleDateFormat("hh:mm")).format(p.criacao) + 
+                     " por " + (Acesso.arquivo.read(p.idUsuario)).nome);
+         Comentario.printComentariosResp(p.getID());
       }
-
    }
 
    /* Método para incluir resposta em uma determinada pergunta

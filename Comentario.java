@@ -14,6 +14,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 import aed3.*;
+import java.text.SimpleDateFormat;
+
 
 
  class Comentario implements Registro{
@@ -26,13 +28,33 @@ import aed3.*;
     /* Metodo para imprimir na tela comentarios de uma determinada pergunta
      * @param int idPergunta
      */
+    public static void printComentariosResp(int idResposta)throws Exception{
+      int[] ids = indiceComResp.read(idResposta);
+      int cont = 0;
+      for (int i : ids){
+        Comentario p = arquivo.read(i);
+        System.out.println((++cont)+".\n");
+        System.out.println("\t"+p.comentario);
+        System.out.println("\tComentado em: " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) +   
+                           "às " + (new SimpleDateFormat("hh:mm")).format(p.criacao) + 
+                           " por " + (Acesso.arquivo.read(p.idUsuario)).nome);
+        
+      } 
+    }
+
+    /* Metodo para imprimir na tela comentarios de uma determinada pergunta
+     * @param int idPergunta
+     */
     public static void printComentariosPerg(int idPergunta)throws Exception{
       int[] ids = indiceComPer.read(idPergunta);
       int cont = 0;
       for (int i : ids){
         Comentario p = arquivo.read(i);
         System.out.println((++cont)+".\n");
-        System.out.println(p.comentario+"\n");
+        System.out.println(p.comentario);
+        System.out.println("Comentado em: " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) +   
+                           " às " + (new SimpleDateFormat("hh:mm")).format(p.criacao) + 
+                           " por " + (Acesso.arquivo.read(p.idUsuario)).nome);
         
       } 
     }
@@ -57,7 +79,7 @@ import aed3.*;
         return escolha;
     }
 
-    /* Metodo para comentar 
+    /* Metodo para comentar em pergunta
      * @param int idUsuario, Scanner leitor, Pergunta pergunta, int escolha
      */
     public static void comentarPerg(int idUsuario, Scanner leitor, Pergunta pergunta) throws Exception{
@@ -90,6 +112,56 @@ import aed3.*;
         }
         
     }
+    /* Metodo para comentar em resposta 
+     * @param int idUsuario, Scanner leitor, Pergunta pergunta, int escolha
+     */
+    public static void comentarResp(int idUsuario, Scanner leitor, Pergunta pergunta) throws Exception{
+        Menu.clear();
+        
+        Pergunta.printPerguntaResumida(pergunta);
+        System.out.println("RESPOSTAS\n---------\n");
+        Resposta.printRespostas(pergunta.getID());
+
+        int[] idsRespostas = Resposta.indicePergResp.read(pergunta.getID());
+        if(idsRespostas.length == 0){
+            System.out.println("ESsa pergunta ainda não foi respondida!");
+            Menu.pause(leitor);
+        }else{
+            System.out.println("Em qual resposta deseja comentar?");
+            System.out.print("\nOpção: ");
+            int escolha = Menu.lerEscolha();
+            if(1 <= escolha && escolha <= idsRespostas.length){
+                Resposta r = Resposta.arquivo.read(idsRespostas[escolha-1]);
+                System.out.println("Resposta escolhida: "+ r.resposta+"\n");
+                System.out.println("Digite o comentário:");
+                String com = leitor.nextLine();
+
+                if(!com.equals("")){
+                    System.out.println("Confirma a inclusão do comentário na resposta acima?");
+                    System.out.print("(SIM(S) NÃO(N)): ");
+                    String confirmacao = leitor.nextLine();
+                    confirmacao = confirmacao.toUpperCase();
+
+                    if(confirmacao.contains("S")){
+                        Comentario novo = new Comentario(idUsuario, (byte)'R', r.getID(), com);
+                        arquivo.create(novo);
+                        indiceComResp.create(novo.idPR, novo.idComentario);
+                        System.out.println("Comentario Incluido com sucesso!");
+                        Menu.pause(leitor);
+                    }else{
+                        System.out.println("Inclusão de comentário cancelada.");
+                        Menu.pause(leitor);
+                    }
+                }else{
+                    System.out.println("Comentário inválido!");
+                }
+                
+            }else{
+                System.out.println("Resposta inválida!");
+                Menu.pause(leitor);
+            }
+        }
+    }
 
     //Atributos
     private int idComentario;
@@ -97,23 +169,25 @@ import aed3.*;
     public byte tipo;
     public int idPR;
     public String comentario;
+    public long criacao;
 
     //Construtores
     public Comentario(){
-        this(-1, -1, (byte)-1, -1, "");
+        this(-1, -1, (byte)-1, -1, "", -1);
     }
 
     //Construtores
     public Comentario(int idUsuario, byte tipo, int idPR, String comentario){
-        this(-1, idUsuario, tipo, idPR, comentario);
+        this(-1, idUsuario, tipo, idPR, comentario, System.currentTimeMillis());
     }
 
-    public Comentario(int _idComentario, int _idUsuario, byte _tipo, int _idPR, String _comentario){
+    public Comentario(int _idComentario, int _idUsuario, byte _tipo, int _idPR, String _comentario, long _criacao){
         this.idComentario = _idComentario;
         this.idUsuario = _idUsuario;
         this.tipo = _tipo;
         this.idPR = _idPR;
         this.comentario = _comentario;
+        this.criacao = _criacao;
     }
 
     //metodos
@@ -154,6 +228,7 @@ import aed3.*;
         dos.writeByte(this.tipo);
         dos.writeInt(this.idPR);
         dos.writeUTF(this.comentario);
+        dos.writeLong(this.criacao);
         return(baos.toByteArray());
     }
     
@@ -170,5 +245,6 @@ import aed3.*;
         this.tipo = dis.readByte();
         this.idPR = dis.readInt();
         this.comentario = dis.readUTF();
+        this.criacao = dis.readLong();
     }
  }
