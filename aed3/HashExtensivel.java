@@ -378,7 +378,7 @@ public class HashExtensivel {
     }
     
     public long read(int chave) throws Exception {
-        
+
         //Carrega o diretório
         byte[] bd = new byte[(int)arqDiretório.length()];
         arqDiretório.seek(0);
@@ -388,10 +388,10 @@ public class HashExtensivel {
         
         // Identifica a hash do diretório,
         int i = diretório.hash(chave);
-        
         // Recupera o cesto
         long endereçoCesto = diretório.endereço(i);
         Cesto c = new Cesto(quantidadeDadosPorCesto);
+        
         byte[] ba = new byte[c.size()];
         arqCestos.seek(endereçoCesto);
         arqCestos.read(ba);

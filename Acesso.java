@@ -156,6 +156,7 @@ public class Acesso{
       String email = leitor.nextLine();
 
       if(arquivo.read(email) != null){
+
          Menu.clear();
          System.out.println();
          System.out.println(Menu.getNome()+" "+Menu.getVersao());

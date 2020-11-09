@@ -147,6 +147,8 @@ public class Menu{
                Acesso.novoUsuario(leitor);
             }
             catch (Exception e){
+               System.out.println(e);
+               pause(leitor);
                telaErro();
             }
             break;
