@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
 Ciencia da Computacao - Pucminas
 AED3 - manha
