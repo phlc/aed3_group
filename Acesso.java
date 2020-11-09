@@ -23,18 +23,6 @@ public class Acesso{
    telaFinal - Apresenta tela final -- nao utilizada
    @Scanner leitor
    
-   public static void telaFinal(Scanner leitor){
-      clear();
-      System.out.println();
-      System.out.println(_NOME+" "+_VERSAO);
-      System.out.println("==================");
-      System.out.println();
-      System.out.println("OBRIGADO POR CONTRIBUIR PARA NOSSA COMUNIDADE");
-      System.out.println();
-      System.out.println("VOLTE SEMPRE");
-      System.out.println();
-      pause(leitor);
-   }
    */
    /*
    acessoSistem - Gerencia o acesso ao Sistema
@@ -168,6 +156,7 @@ public class Acesso{
       String email = leitor.nextLine();
 
       if(arquivo.read(email) != null){
+
          Menu.clear();
          System.out.println();
          System.out.println(Menu.getNome()+" "+Menu.getVersao());
@@ -195,22 +184,27 @@ public class Acesso{
          System.out.println("NOME: "+nome);
          System.out.println("EMAIL: "+email);
          System.out.println();
-         System.out.print("CONFIRME OS DADOS (SIM(S) NÃO(N)): ");
-         String confirmacao = leitor.nextLine();
-         confirmacao = confirmacao.toUpperCase();
- 
-         if(confirmacao.contains("S")){
-            Usuario novo = new Usuario(-1, nome, email, senha);
-            arquivo.create(novo);
-            Menu.clear();
-            System.out.println();
-            System.out.println(Menu.getNome()+" "+Menu.getVersao());
-            System.out.println("==================");
-            System.out.println();
-            System.out.println("USUÁRIO CADASTRADO COM SUCESSO");
-            System.out.println();
-            System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
+         if(nome.equals("") || senha.equals("") || email.equals("") ){
+            System.out.println("Erro! Há campos não preencidos.");
             Menu.pause(leitor);
+         }else{
+            System.out.print("CONFIRME OS DADOS (SIM(S) NÃO(N)): ");
+            String confirmacao = leitor.nextLine();
+            confirmacao = confirmacao.toUpperCase();
+
+            if(confirmacao.contains("S")){
+               Usuario novo = new Usuario(-1, nome, email, senha);
+               arquivo.create(novo);
+               Menu.clear();
+               System.out.println();
+               System.out.println(Menu.getNome()+" "+Menu.getVersao());
+               System.out.println("==================");
+               System.out.println();
+               System.out.println("USUÁRIO CADASTRADO COM SUCESSO");
+               System.out.println();
+               System.out.println("FAÇA SEU LOGIN PARA ACESSAR O SISTEMA");
+               Menu.pause(leitor);
+            }
          }
       } 
    }

@@ -13,7 +13,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.ArrayList;
 import aed3.*;
+
+import java.text.SimpleDateFormat;
+
 
  class Resposta implements Registro{
    //Atributos estáticos
@@ -46,11 +50,14 @@ import aed3.*;
       int[] ids = indicePergResp.read(id);
       for(int i = 0; i < ids.length; i++){
          System.out.println((i+1)+".\n");
-         Resposta r = arquivo.read(ids[i]);
-         System.out.println(r.resposta);
-         System.out.println("Nota:" + r.nota + "\n");
+         Resposta p = arquivo.read(ids[i]);
+         System.out.println(p.resposta);
+         System.out.println("Nota:" + p.nota + "\n");
+         System.out.println("Respondido em: " + (new SimpleDateFormat("dd/MM/yyyy")).format(p.criacao) +   
+                     " às " + (new SimpleDateFormat("hh:mm")).format(p.criacao) + 
+                     " por " + (Acesso.arquivo.read(p.idUsuario)).nome);
+         Comentario.printComentariosResp(p.getID());
       }
-
    }
 
    /* Método para incluir resposta em uma determinada pergunta
@@ -88,11 +95,13 @@ import aed3.*;
     */
    public static boolean alterarResp(int idPerg, int idUser, Scanner leitor)throws Exception{
       int[] ids = indicePergResp.read(idPerg);
+      ArrayList<Resposta> al = new ArrayList<Resposta>();
       int cont = 0;
 
       for (int i : ids){
          Resposta p = arquivo.read(i);
          if(p.idUsuario == idUser){
+            al.add(p);
             System.out.println((++cont)+".\n");
             System.out.println(p.resposta);
             System.out.println("Nota:" + p.nota + "\n");
@@ -101,8 +110,8 @@ import aed3.*;
 
       System.out.println("Qual resposta deseja alterar?");
       int r = Menu.lerEscolha();
-      if(r > 0 && r <= ids.length){
-         Resposta p = arquivo.read(ids[r-1]);
+      if(r > 0 && r <= al.size()){
+         Resposta p = al.get(r-1);
 
          System.out.println("Resposta escolhida para alteração: ");
          System.out.println(p.resposta);
@@ -140,11 +149,13 @@ import aed3.*;
 
    public static boolean arquivarPerg(int idPerg, int idUser, Scanner leitor)throws Exception{
       int[] ids = indicePergResp.read(idPerg);
+      ArrayList<Resposta> al = new ArrayList<Resposta>();
       int cont = 0;
 
       for (int i : ids){
          Resposta p = arquivo.read(i);
          if(p.idUsuario == idUser){
+            al.add(p);
             System.out.println((++cont)+".\n");
             System.out.println(p.resposta);
             System.out.println("Nota:" + p.nota + "\n");
@@ -153,8 +164,8 @@ import aed3.*;
 
       System.out.println("Qual resposta deseja arquivar?");
       int r = Menu.lerEscolha();
-      if(r > 0 && r <= ids.length){
-         Resposta p = arquivo.read(ids[r-1]);
+      if(r > 0 && r <= al.size()){
+         Resposta p = al.get(r-1);
             
          System.out.println("Resposta escolhida para arquivar: ");
          System.out.println(p.resposta);
@@ -170,7 +181,7 @@ import aed3.*;
             arquivo.update(p);
             indicePergResp.delete(idPerg, p.idResposta);
             indiceUserResp.delete(idUser, p.idResposta);
-            System.out.println("Resposta arqivada com sucesso!");
+            System.out.println("Resposta arquivada com sucesso!");
             return true;
          }else{ 
             System.out.println("Resposta não arquivada.");

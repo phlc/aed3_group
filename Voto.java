@@ -110,54 +110,58 @@ class Voto implements Registro{
             System.out.println("Em qual resposta deseja votar?");
             System.out.print("\nOpção: ");
             int escolhaResp = Menu.lerEscolha();
+            if(1 <= escolhaResp && escolhaResp <= idsRespostas.length){
+                id_PR = idsRespostas[escolhaResp-1];
+                Resposta resposta = Resposta.arquivo.read(id_PR);
+                tipoVoto = 'R';
 
-            id_PR = idsRespostas[escolhaResp-1];
-            Resposta resposta = Resposta.arquivo.read(id_PR);
-            tipoVoto = 'R';
+                voto = new Voto(-1, idUsuario, tipoVoto, id_PR, false);
 
-            voto = new Voto(-1, idUsuario, tipoVoto, id_PR, false);
-
-            if(arquivo.read(voto.chaveSecundaria()) != null){
-                System.out.println("Você já votou nesta resposta! Não é possível votar novamente.");
-                Menu.pause(leitor);
-            }else{
-                System.out.println("Deseja dar um voto positivo ou negativo?");
-                System.out.println("1) Positivo\n2) Negativo");
-                System.out.print("\nOpção: ");
-                int escolha = Menu.lerEscolha();
-                if(escolha == 1){
-                    System.out.println("Confirma o voto POSITIVO na resposta acima?");
-                    System.out.print("(SIM(S) NÃO(N)): ");
-                    String confirmacao = leitor.nextLine();
-                    confirmacao = confirmacao.toUpperCase();
-                    if(confirmacao.contains("S")){
-                        voto.voto = true;
-                        arquivo.create(voto);
-                        resposta.nota = (short)(resposta.nota + 1);
-                        Resposta.arquivo.update(resposta);
-                        System.out.println("Voto registrado com sucesso!");
-                        Menu.pause(leitor);
-                    }else{
-                        System.out.println("Voto cancelado.");
-                        Menu.pause(leitor);
-                    }
+                if(arquivo.read(voto.chaveSecundaria()) != null){
+                    System.out.println("Você já votou nesta resposta! Não é possível votar novamente.");
+                    Menu.pause(leitor);
                 }else{
-                    System.out.println("Confirma o voto NEGATIVO na resposta acima?");
-                    System.out.print("(SIM(S) NÃO(N)): ");
-                    String confirmacao = leitor.nextLine();
-                    confirmacao = confirmacao.toUpperCase();
-                    if(confirmacao.contains("S")){
-                        voto.voto = false;
-                        arquivo.create(voto);
-                        resposta.nota = (short)(resposta.nota - 1);
-                        Resposta.arquivo.update(resposta);
-                        System.out.println("Voto registrado com sucesso!");
-                        Menu.pause(leitor);
+                    System.out.println("Deseja dar um voto positivo ou negativo?");
+                    System.out.println("1) Positivo\n2) Negativo");
+                    System.out.print("\nOpção: ");
+                    int escolha = Menu.lerEscolha();
+                    if(escolha == 1){
+                        System.out.println("Confirma o voto POSITIVO na resposta acima?");
+                        System.out.print("(SIM(S) NÃO(N)): ");
+                        String confirmacao = leitor.nextLine();
+                        confirmacao = confirmacao.toUpperCase();
+                        if(confirmacao.contains("S")){
+                            voto.voto = true;
+                            arquivo.create(voto);
+                            resposta.nota = (short)(resposta.nota + 1);
+                            Resposta.arquivo.update(resposta);
+                            System.out.println("Voto registrado com sucesso!");
+                            Menu.pause(leitor);
+                        }else{
+                            System.out.println("Voto cancelado.");
+                            Menu.pause(leitor);
+                        }
                     }else{
-                        System.out.println("Voto cancelado.");
-                        Menu.pause(leitor);
+                        System.out.println("Confirma o voto NEGATIVO na resposta acima?");
+                        System.out.print("(SIM(S) NÃO(N)): ");
+                        String confirmacao = leitor.nextLine();
+                        confirmacao = confirmacao.toUpperCase();
+                        if(confirmacao.contains("S")){
+                            voto.voto = false;
+                            arquivo.create(voto);
+                            resposta.nota = (short)(resposta.nota - 1);
+                            Resposta.arquivo.update(resposta);
+                            System.out.println("Voto registrado com sucesso!");
+                            Menu.pause(leitor);
+                        }else{
+                            System.out.println("Voto cancelado.");
+                            Menu.pause(leitor);
+                        }
                     }
                 }
+            }else{
+                System.out.println("Resposta inválida!");
+                Menu.pause(leitor);
             }
         }
     }

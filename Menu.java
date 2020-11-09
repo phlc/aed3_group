@@ -7,9 +7,6 @@ Pedro Henrique Lima Carvalho
 Tarcila Fernanda Resende da Silva
 */
 
-/*
- * ATENÇÃO: CÓDIGO NÃO COMPILADO AINDA
-*/
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -57,7 +54,10 @@ public class Menu{
       File DBs = new File("DBs");
       if(!DBs.exists())
          DBs.mkdir();
-
+      
+      Comentario.arquivo = new CRUD<Comentario>(Comentario.class.getConstructor(), "DBs/comentario.db");
+      Comentario.indiceComPer = new ArvoreBMais_Int_Int(5, "DBs/indiceComPerg.db");
+      Comentario.indiceComResp = new ArvoreBMais_Int_Int(5, "DBs/indiceComResp.db");
       Acesso.arquivo = new CRUD<Usuario>(Usuario.class.getConstructor(), "DBs/usuarios.db");
       Pergunta.arquivo = new CRUD<Pergunta>(Pergunta.class.getConstructor(), "DBs/perguntas.db");
       Resposta.arquivo = new CRUD<Resposta>(Resposta.class.getConstructor(), "DBs/respostas.db");
@@ -147,6 +147,8 @@ public class Menu{
                Acesso.novoUsuario(leitor);
             }
             catch (Exception e){
+               System.out.println(e);
+               pause(leitor);
                telaErro();
             }
             break;
@@ -328,7 +330,7 @@ public class Menu{
 
       switch(escolha){
          case 0:
-            estado = 2;
+            estado = 4;
             break;
          case 1: 
             try{
@@ -405,6 +407,43 @@ public class Menu{
       }
    }
 
+   public static void menuComentar(){
+      clear();
+      System.out.println(header);
+      System.out.println("PERGUNTAS > CONSULTAR PERGUNTAS > VOTAR\n");
+      int escolha = -1;
+      try{
+         escolha = Comentario.escolherPergOuResp(leitor, perg);
+      }catch(Exception e){
+         telaErro();
+      }
+
+      switch(escolha){
+         case 0:
+            estado = 7;
+            break;
+         case 1:
+            try{
+               Comentario.comentarPerg(online.getID(), leitor, perg);
+               estado = 7;
+            }catch(Exception e){
+               telaErro();
+            }
+            break;
+         case 2:
+            try{
+               Comentario.comentarResp(online.getID(), leitor, perg);
+               estado = 7;
+            }catch(Exception e){
+               telaErro();
+            }
+            break;
+         default:
+            System.out.println("\nEscolha inválida");
+            pause(leitor);
+      }
+   }
+
    /*
     * main - funcao principal de interação com o usuário
     */
@@ -442,6 +481,9 @@ public class Menu{
                   }
                   int escolha = lerEscolha();
                   estado = Pergunta.escolhaMenuPergunta(escolha, leitor);
+                  break;
+               case 8:
+                  menuComentar();
                   break;
                default:
                   telaErro();
