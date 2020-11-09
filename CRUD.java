@@ -65,7 +65,7 @@ class CRUD <T extends Registro>{
       }
       
       //criacao dos indices direto e indireto
-      direto = new HashExtensivel(4, (file+".diretorio"), (file+".cestos"));
+      direto = new HashExtensivel(100, (file+".diretorio"), (file+".cestos"));
       indireto = new ArvoreBMais_String_Int(5, (file+".arvore"));
       apagados = new Lista_Apagados(file+".apagados");
    }
